@@ -57,6 +57,7 @@ try {
             'endpoints' => [
                 'test' => '/api/test',
                 'properties' => '/api/properties',
+                'property-types' => '/api/property-types',
                 'auth' => '/api/auth',
                 'cities' => '/api/cities',
                 'districts' => '/api/districts',
@@ -66,6 +67,10 @@ try {
                 'property-statuses' => '/api/property-statuses',
                 'property-images' => '/api/property-images',
                 'role-requests' => '/api/role-requests',
+                'notifications' => '/api/notifications',
+                'stats' => '/api/stats',
+                'contact' => '/api/contact',
+                'my-contacts' => '/api/my-contacts',
                 'admin' => '/api/admin'
             ]
         ], 'API aktif ve çalışıyor');
@@ -130,6 +135,31 @@ try {
         case 'admin':
             // Admin yönetim endpoint'i
             handleAdminEndpoint($db, $method, $segments);
+            break;
+            
+        case 'notifications':
+            // Bildirimler endpoint'i
+            handleNotificationsEndpoint($db, $method, $segments);
+            break;
+            
+        case 'stats':
+            // İstatistikler endpoint'i
+            handleStatsEndpoint($db, $method, $segments);
+            break;
+            
+        case 'contact':
+            // İletişim endpoint'i
+            handleContactEndpoint($db, $method, $segments);
+            break;
+            
+        case 'my-contacts':
+            // Kullanıcının kendi mesajları endpoint'i
+            handleMyContactsEndpoint($db, $method, $segments);
+            break;
+            
+        case 'property-types':
+            // Emlak tipleri endpoint'i
+            handlePropertyTypesEndpoint($db, $method, $segments);
             break;
             
         default:
@@ -837,8 +867,328 @@ function handleAdminEndpoint($db, $method, $segments) {
             $adminController->getSystemSettings();
             break;
             
+        case 'notifications':
+            // Admin bildirim yönetimi: /api/admin/notifications
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            require_once '../controllers/NotificationController.php';
+            $notificationController = new NotificationController($db);
+            $notificationController->getAllForAdmin();
+            break;
+            
+        case 'contacts':
+            // Admin iletişim yönetimi: /api/admin/contacts
+            require_once '../controllers/ContactController.php';
+            $contactController = new ContactController($db);
+            
+            $contact_action = $segments[2] ?? null;
+            
+            switch ($contact_action) {
+                case 'stats':
+                    if ($method !== 'GET') {
+                        Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+                    }
+                    $contactController->getStatsForAdmin();
+                    break;
+                    
+                case 'search':
+                    if ($method !== 'GET') {
+                        Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+                    }
+                    $contactController->searchForAdmin();
+                    break;
+                    
+                case null:
+                    if ($method !== 'GET') {
+                        Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+                    }
+                    $contactController->getAllForAdmin();
+                    break;
+                    
+                default:
+                    Response::notFound('Admin iletişim endpoint bulunamadı: ' . $contact_action);
+            }
+            break;
+            
         default:
             Response::notFound('Admin endpoint bulunamadı: ' . $action);
+    }
+}
+
+/**
+ * Bildirimler endpoint'i
+ */
+function handleNotificationsEndpoint($db, $method, $segments) {
+    require_once '../controllers/NotificationController.php';
+    
+    $notificationController = new NotificationController($db);
+    
+    $action = $segments[1] ?? null;
+    $id = $segments[2] ?? null;
+    
+    switch ($action) {
+        case 'unread-count':
+            // Okunmamış bildirim sayısı: /api/notifications/unread-count
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $notificationController->getUnreadCount();
+            break;
+            
+        case 'mark-all-read':
+            // Tüm bildirimleri okundu işaretle: /api/notifications/mark-all-read
+            if ($method !== 'PUT') {
+                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            }
+            $notificationController->markAllAsRead();
+            break;
+            
+        case 'types':
+            // Bildirim tipleri: /api/notifications/types
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $notificationController->getTypes();
+            break;
+            
+        case 'bulk-send':
+            // Toplu bildirim gönder: /api/notifications/bulk-send
+            if ($method !== 'POST') {
+                Response::error('Bu endpoint sadece POST metodunu destekler', 405);
+            }
+            $notificationController->bulkSend();
+            break;
+            
+        case null:
+            switch ($method) {
+                case 'GET':
+                    if (is_numeric($segments[1] ?? '')) {
+                        // Belirli bir bildirimi getir
+                        $notificationController->getById($segments[1]);
+                    } else {
+                        // Kullanıcının bildirimlerini getir
+                        $notificationController->getUserNotifications();
+                    }
+                    break;
+                    
+                default:
+                    Response::error('Desteklenmeyen HTTP metodu', 405);
+            }
+            break;
+            
+        default:
+            if (is_numeric($action)) {
+                switch ($method) {
+                    case 'GET':
+                        $notificationController->getById($action);
+                        break;
+                        
+                    case 'PUT':
+                        // Bildirimi okundu işaretle
+                        $notificationController->markAsRead($action);
+                        break;
+                        
+                    case 'DELETE':
+                        $notificationController->delete($action);
+                        break;
+                        
+                    default:
+                        Response::error('Desteklenmeyen HTTP metodu', 405);
+                }
+            } else {
+                Response::notFound('Bildirim endpoint bulunamadı: ' . $action);
+            }
+    }
+}
+
+/**
+ * İstatistikler endpoint'i
+ */
+function handleStatsEndpoint($db, $method, $segments) {
+    require_once '../controllers/StatsController.php';
+    
+    $statsController = new StatsController($db);
+    
+    if ($method !== 'GET' && $method !== 'POST') {
+        Response::error('Bu endpoint sadece GET ve POST metodlarını destekler', 405);
+    }
+    
+    $action = $segments[1] ?? null;
+    $subAction = $segments[2] ?? null;
+    
+    switch ($action) {
+        case 'general':
+            // Genel istatistikler: /api/stats/general
+            $statsController->getGeneralStats();
+            break;
+            
+        case 'users':
+            // Kullanıcı istatistikleri: /api/stats/users
+            $statsController->getUserStats();
+            break;
+            
+        case 'properties':
+            // Emlak istatistikleri: /api/stats/properties
+            $statsController->getPropertyStats();
+            break;
+            
+        case 'cities':
+            // Şehir istatistikleri: /api/stats/cities
+            $statsController->getCityStats();
+            break;
+            
+        case 'popular-properties':
+            // Popüler ilanlar: /api/stats/popular-properties
+            $statsController->getPopularProperties();
+            break;
+            
+        case 'top-realtors':
+            // En aktif emlakçılar: /api/stats/top-realtors
+            $statsController->getTopRealtors();
+            break;
+            
+        case 'price-ranges':
+            // Fiyat aralığı istatistikleri: /api/stats/price-ranges
+            $statsController->getPriceRanges();
+            break;
+            
+        case 'dashboard':
+            // Dashboard istatistikleri: /api/stats/dashboard
+            $statsController->getDashboardStats();
+            break;
+            
+        case 'my-activity':
+            // Kendi aktivite istatistikleri: /api/stats/my-activity
+            $statsController->getMyActivityStats();
+            break;
+            
+        case 'monthly':
+            // Aylık istatistikler: /api/stats/monthly/{type}
+            switch ($subAction) {
+                case 'properties':
+                    $statsController->getMonthlyPropertyStats();
+                    break;
+                    
+                default:
+                    Response::notFound('Aylık istatistik tipi bulunamadı: ' . $subAction);
+            }
+            break;
+            
+        case 'custom-report':
+            // Özel rapor: /api/stats/custom-report
+            if ($method !== 'POST') {
+                Response::error('Bu endpoint sadece POST metodunu destekler', 405);
+            }
+            $statsController->generateCustomReport();
+            break;
+            
+        default:
+            Response::notFound('İstatistik endpoint bulunamadı: ' . $action);
+    }
+}
+
+/**
+ * İletişim endpoint'i
+ */
+function handleContactEndpoint($db, $method, $segments) {
+    require_once '../controllers/ContactController.php';
+    
+    $contactController = new ContactController($db);
+    
+    $action = $segments[1] ?? null;
+    
+    switch ($action) {
+        case 'types':
+            // İletişim tipleri: /api/contact/types
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $contactController->getTypes();
+            break;
+            
+        case 'statuses':
+            // İletişim durumları: /api/contact/statuses
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $contactController->getStatuses();
+            break;
+            
+        case null:
+            switch ($method) {
+                case 'POST':
+                    // İletişim formu gönder: /api/contact
+                    $contactController->create();
+                    break;
+                    
+                default:
+                    Response::error('Desteklenmeyen HTTP metodu', 405);
+            }
+            break;
+            
+        default:
+            Response::notFound('İletişim endpoint bulunamadı: ' . $action);
+    }
+}
+
+/**
+ * Kullanıcının kendi mesajları endpoint'i
+ */
+function handleMyContactsEndpoint($db, $method, $segments) {
+    require_once '../controllers/ContactController.php';
+    
+    $contactController = new ContactController($db);
+    
+    if ($method !== 'GET') {
+        Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+    }
+    
+    $contactController->getMyContacts();
+}
+
+/**
+ * Emlak tipleri endpoint'i
+ */
+function handlePropertyTypesEndpoint($db, $method, $segments) {
+    require_once '../models/PropertyType.php';
+    
+    if ($method !== 'GET') {
+        Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+    }
+    
+    $propertyType = new PropertyType($db);
+    
+    $action = $segments[1] ?? null;
+    
+    switch ($action) {
+        case null:
+            if (is_numeric($segments[1] ?? '')) {
+                // Belirli bir tipi getir
+                $result = $propertyType->getById($segments[1]);
+                if ($result) {
+                    Response::success($result, 'Emlak tipi başarıyla getirildi');
+                } else {
+                    Response::notFound('Emlak tipi bulunamadı');
+                }
+            } else {
+                // Tüm tipleri getir
+                $result = $propertyType->getAll();
+                Response::success($result, 'Emlak tipleri başarıyla getirildi');
+            }
+            break;
+            
+        default:
+            if (is_numeric($action)) {
+                $result = $propertyType->getById($action);
+                if ($result) {
+                    Response::success($result, 'Emlak tipi başarıyla getirildi');
+                } else {
+                    Response::notFound('Emlak tipi bulunamadı');
+                }
+            } else {
+                Response::notFound('Emlak tipi endpoint bulunamadı: ' . $action);
+            }
     }
 }
 ?> 

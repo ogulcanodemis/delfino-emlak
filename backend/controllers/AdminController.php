@@ -351,12 +351,11 @@ class AdminController {
             
             // İlanları getir
             $query = "SELECT p.*, 
-                             u.first_name, u.last_name, u.email,
+                             u.name as user_name, u.email,
                              c.name as city_name,
                              d.name as district_name,
                              pt.name as property_type_name,
-                             ps.name as status_name,
-                             (SELECT image_path FROM property_images WHERE property_id = p.id AND is_primary = 1 LIMIT 1) as main_image,
+                             (SELECT image_path FROM property_images WHERE property_id = p.id LIMIT 1) as main_image,
                              (SELECT COUNT(*) FROM property_images WHERE property_id = p.id) as image_count,
                              (SELECT COUNT(*) FROM favorites WHERE property_id = p.id) as favorite_count
                       FROM properties p
@@ -364,7 +363,6 @@ class AdminController {
                       LEFT JOIN cities c ON p.city_id = c.id
                       LEFT JOIN districts d ON p.district_id = d.id
                       LEFT JOIN property_types pt ON p.property_type_id = pt.id
-                      LEFT JOIN property_status ps ON p.status_id = ps.id
                       {$where_clause}
                       ORDER BY p.created_at DESC
                       LIMIT :limit OFFSET :offset";
@@ -570,7 +568,7 @@ class AdminController {
     private function getPropertyStats() {
         $query = "SELECT 
                     COUNT(*) as total_properties,
-                    COUNT(CASE WHEN status = 1 THEN 1 END) as active_properties,
+                    COUNT(CASE WHEN is_active = 1 THEN 1 END) as active_properties,
                     COUNT(CASE WHEN is_featured = 1 THEN 1 END) as featured_properties,
                     COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as new_properties_month,
                     COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as new_properties_week,
