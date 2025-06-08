@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emlak-Delfino CRUD Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        input { width: 100%; padding: 8px; margin: 5px 0; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Emlak-Delfino CRUD Test Paneli</h1>
+        
+        <!-- Login Section -->
+        <div class="section">
+            <h2>1. Login (Token Al)</h2>
+            <input type="email" id="email" placeholder="E-posta" value="emlakci@emlakdelfino.com">
+            <input type="password" id="password" placeholder="Şifre" value="password">
+            <button onclick="login()">Giriş Yap</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <!-- Create Property Section -->
+        <div class="section">
+            <h2>2. Yeni İlan Oluştur (POST)</h2>
+            <input type="text" id="title" placeholder="İlan Başlığı" value="Test Ilani - CRUD">
+            <textarea id="description" placeholder="Açıklama">Bu ilan CRUD testleri icin olusturulmustur</textarea>
+            <input type="number" id="price" placeholder="Fiyat" value="1500000">
+            <input type="number" id="area" placeholder="Alan (m²)" value="100">
+            <input type="number" id="rooms" placeholder="Oda Sayısı" value="3">
+            <button onclick="createProperty()">İlan Oluştur</button>
+            <div id="createResult" class="result"></div>
+        </div>
+
+        <!-- Update Property Section -->
+        <div class="section">
+            <h2>3. İlan Güncelle (PUT)</h2>
+            <input type="number" id="updateId" placeholder="İlan ID" value="">
+            <input type="text" id="updateTitle" placeholder="Yeni Başlık" value="Guncellenmis Ilan Basligi">
+            <button onclick="updateProperty()">İlan Güncelle</button>
+            <div id="updateResult" class="result"></div>
+        </div>
+
+        <!-- Delete Property Section -->
+        <div class="section">
+            <h2>4. İlan Sil (DELETE)</h2>
+            <input type="number" id="deleteId" placeholder="İlan ID" value="">
+            <button onclick="deleteProperty()">İlan Sil</button>
+            <div id="deleteResult" class="result"></div>
+        </div>
+
+        <!-- List Properties Section -->
+        <div class="section">
+            <h2>5. İlanları Listele (GET)</h2>
+            <button onclick="listProperties()">İlanları Listele</button>
+            <div id="listResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = '';
+        const API_BASE = 'http://localhost/emlak-delfino/backend/api';
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('loginResult').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.status === 'success') {
+                    authToken = data.data.token;
+                    alert('Giriş başarılı! Token alındı.');
+                }
+            } catch (error) {
+                document.getElementById('loginResult').textContent = 'Hata: ' + error.message;
+            }
+        }
+
+        async function createProperty() {
+            if (!authToken) {
+                alert('Önce giriş yapın!');
+                return;
+            }
+
+            const propertyData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                price: parseInt(document.getElementById('price').value),
+                property_type_id: 1,
+                status_id: 1,
+                city_id: 1,
+                district_id: 1,
+                area: parseInt(document.getElementById('area').value),
+                rooms: parseInt(document.getElementById('rooms').value),
+                bathrooms: 2,
+                floor: 2,
+                total_floors: 5,
+                building_age: 5,
+                heating_type: "Doğalgaz",
+                furnishing: "Eşyasız",
+                balcony: 1,
+                elevator: 1,
+                parking: 1,
+                address: "Test Mahallesi, Test Sokak No:1"
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/properties`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(propertyData)
+                });
+                
+                const data = await response.json();
+                document.getElementById('createResult').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.status === 'success') {
+                    document.getElementById('updateId').value = data.data.property_id;
+                    document.getElementById('deleteId').value = data.data.property_id;
+                }
+            } catch (error) {
+                document.getElementById('createResult').textContent = 'Hata: ' + error.message;
+            }
+        }
+
+        async function updateProperty() {
+            if (!authToken) {
+                alert('Önce giriş yapın!');
+                return;
+            }
+
+            const id = document.getElementById('updateId').value;
+            if (!id) {
+                alert('İlan ID girin!');
+                return;
+            }
+
+            const updateData = {
+                title: document.getElementById('updateTitle').value,
+                price: 1600000
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/properties/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                document.getElementById('updateResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('updateResult').textContent = 'Hata: ' + error.message;
+            }
+        }
+
+        async function deleteProperty() {
+            if (!authToken) {
+                alert('Önce giriş yapın!');
+                return;
+            }
+
+            const id = document.getElementById('deleteId').value;
+            if (!id) {
+                alert('İlan ID girin!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/properties/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('deleteResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('deleteResult').textContent = 'Hata: ' + error.message;
+            }
+        }
+
+        async function listProperties() {
+            try {
+                const response = await fetch(`${API_BASE}/properties`);
+                const data = await response.json();
+                document.getElementById('listResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('listResult').textContent = 'Hata: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html> 
