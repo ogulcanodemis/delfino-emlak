@@ -33,8 +33,8 @@ class Favorite {
                     p.title,
                     p.price,
                     p.address,
-                    p.city,
-                    p.district,
+                    c.name as city,
+                    d.name as district,
                     p.area,
                     p.rooms,
                     p.bathrooms,
@@ -45,6 +45,8 @@ class Favorite {
                   LEFT JOIN properties p ON f.property_id = p.id
                   LEFT JOIN property_types pt ON p.property_type_id = pt.id
                   LEFT JOIN property_status ps ON p.status_id = ps.id
+                  LEFT JOIN cities c ON p.city_id = c.id
+                  LEFT JOIN districts d ON p.district_id = d.id
                   WHERE f.user_id = :user_id 
                   AND p.is_active = 1
                   ORDER BY f.created_at DESC
@@ -158,10 +160,12 @@ class Favorite {
                     p.title,
                     p.price,
                     p.address,
-                    p.city,
-                    p.district
+                    c.name as city,
+                    d.name as district
                   FROM " . $this->table_name . " f
                   LEFT JOIN properties p ON f.property_id = p.id
+                  LEFT JOIN cities c ON p.city_id = c.id
+                  LEFT JOIN districts d ON p.district_id = d.id
                   WHERE f.id = :id AND f.user_id = :user_id";
 
         $stmt = $this->conn->prepare($query);

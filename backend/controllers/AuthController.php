@@ -203,6 +203,9 @@ class AuthController {
         $this->user->name = $data['name'] ?? $user_data['name'];
         $this->user->phone = $data['phone'] ?? $user_data['phone'];
         $this->user->address = $data['address'] ?? $user_data['address'];
+        $this->user->bio = $data['bio'] ?? $user_data['bio'];
+        $this->user->company = $data['company'] ?? $user_data['company'];
+        $this->user->website = $data['website'] ?? $user_data['website'];
         $this->user->city_id = $data['city_id'] ?? $user_data['city_id'];
         $this->user->district_id = $data['district_id'] ?? $user_data['district_id'];
         $this->user->neighborhood_id = $data['neighborhood_id'] ?? $user_data['neighborhood_id'];

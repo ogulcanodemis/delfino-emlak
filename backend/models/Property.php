@@ -262,10 +262,49 @@ class Property {
     }
 
     /**
+     * Kullanıcının kendi ilanını getir (aktif/pasif fark etmez)
+     */
+    public function getByIdForOwner($id, $user_id) {
+        $query = "SELECT p.*, 
+                         pt.name as property_type_name,
+                         ps.name as status_name,
+                         c.name as city_name,
+                         d.name as district_name,
+                         n.name as neighborhood_name,
+                         u.name as user_name,
+                         u.email as user_email,
+                         u.phone as user_phone
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN property_types pt ON p.property_type_id = pt.id
+                  LEFT JOIN property_status ps ON p.status_id = ps.id
+                  LEFT JOIN cities c ON p.city_id = c.id
+                  LEFT JOIN districts d ON p.district_id = d.id
+                  LEFT JOIN neighborhoods n ON p.neighborhood_id = n.id
+                  LEFT JOIN users u ON p.user_id = u.id
+                  WHERE p.id = :id AND p.user_id = :user_id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $property = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // İlan görsellerini getir
+            $property['images'] = $this->getPropertyImages($id);
+            
+            return $property;
+        }
+
+        return false;
+    }
+
+    /**
      * İlan görsellerini getir
      */
     public function getPropertyImages($property_id) {
-        $query = "SELECT id, image_path, image_name, alt_text, is_primary, display_order
+        $query = "SELECT id, image_path as image_url, image_name, alt_text, is_primary, display_order
                   FROM property_images 
                   WHERE property_id = :property_id 
                   ORDER BY is_primary DESC, display_order ASC";
@@ -308,6 +347,18 @@ class Property {
     }
 
     /**
+     * Kullanıcının toplam ilan sayısını getir
+     */
+    public function getUserPropertyCount($user_id) {
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE user_id = :user_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
+
+    /**
      * İlan güncelle
      */
     public function update() {
@@ -327,6 +378,29 @@ class Property {
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
+
+        // Debug: Değerleri logla
+        error_log("Property Update - furnishing: " . ($this->furnishing ?? 'NULL'));
+        error_log("Property Update - heating_type: " . ($this->heating_type ?? 'NULL'));
+
+        // Enum değerlerini validate et
+        $valid_furnishing = ['Eşyalı', 'Eşyasız', 'Yarı Eşyalı'];
+        $valid_heating = ['Doğalgaz', 'Elektrik', 'Kömür', 'Fuel-oil', 'Güneş Enerjisi', 'Jeotermal', 'Klima', 'Soba', 'Şömine', 'Yok'];
+        
+        // NULL veya boş string kontrolü
+        if ($this->furnishing === null || $this->furnishing === '') {
+            $this->furnishing = 'Eşyasız'; // Default değer
+        } elseif (!in_array($this->furnishing, $valid_furnishing)) {
+            error_log("Invalid furnishing value: " . $this->furnishing);
+            $this->furnishing = 'Eşyasız'; // Default değer
+        }
+        
+        if ($this->heating_type === null || $this->heating_type === '') {
+            $this->heating_type = 'Doğalgaz'; // Default değer
+        } elseif (!in_array($this->heating_type, $valid_heating)) {
+            error_log("Invalid heating_type value: " . $this->heating_type);
+            $this->heating_type = 'Doğalgaz'; // Default değer
+        }
 
         // Verileri temizle
         $this->title = htmlspecialchars(strip_tags($this->title ?? ''));
@@ -378,6 +452,46 @@ class Property {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $property_id);
         return $stmt->execute();
+    }
+
+    /**
+     * İlan tamamen sil (hard delete)
+     */
+    public function hardDelete($id = null) {
+        $property_id = $id ?? $this->id;
+        
+        try {
+            // Transaction başlat
+            $this->conn->beginTransaction();
+            
+            // Önce ilan görsellerini sil
+            $query = "DELETE FROM property_images WHERE property_id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $property_id);
+            $stmt->execute();
+            
+            // Favorilerden sil
+            $query = "DELETE FROM favorites WHERE property_id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $property_id);
+            $stmt->execute();
+            
+            // İlanı sil
+            $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $property_id);
+            $result = $stmt->execute();
+            
+            // Transaction'ı commit et
+            $this->conn->commit();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            // Hata durumunda rollback
+            $this->conn->rollback();
+            throw $e;
+        }
     }
 
     /**

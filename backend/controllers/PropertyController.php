@@ -49,6 +49,11 @@ class PropertyController {
             // İlanları getir
             $properties = $this->property->getAll($page, $limit, $filters);
             
+            // Her property için images'ı ekle
+            foreach ($properties as &$property) {
+                $property['images'] = $this->property->getPropertyImages($property['id']);
+            }
+            
             // Toplam sayıyı getir
             $total = $this->property->getTotalCount($filters);
             
@@ -85,10 +90,21 @@ class PropertyController {
      */
     public function getProperty($id) {
         try {
-            // Kullanıcı rolünü al
+            // Kullanıcı verilerini al
+            $user_data = $this->getUserData();
             $user_role = $this->getUserRole();
             
-            // İlan detayını getir
+            // Eğer kullanıcı giriş yapmışsa ve kendi ilanını görüntülüyorsa
+            if ($user_data) {
+                $property = $this->property->getByIdForOwner($id, $user_data['user_id']);
+                if ($property) {
+                    // Kendi ilanı - görüntülenme sayısını artırma
+                    Response::success(['property' => $property], 'İlan detayı başarıyla getirildi');
+                    return;
+                }
+            }
+            
+            // Normal ilan detayını getir (sadece aktif ilanlar)
             $property = $this->property->getById($id, $user_role);
             
             if (!$property) {
@@ -110,9 +126,9 @@ class PropertyController {
      */
     public function createProperty() {
         try {
-            // Sadece emlakçı ve admin ilan oluşturabilir
+            // Kayıtlı kullanıcı, emlakçı ve admin ilan oluşturabilir
             $user_role = $this->getUserRole();
-            if (!$user_role || !in_array($user_role, [2, 3])) { // 2: Emlakçı, 3: Admin
+            if (!$user_role || !in_array($user_role, [1, 2, 3, 4])) { // 1: Kayıtlı Kullanıcı, 2: Emlakçı, 3: Admin, 4: Super Admin
                 Response::error('Bu işlem için yetkiniz bulunmamaktadır', 403);
             }
 
@@ -194,17 +210,26 @@ class PropertyController {
                 Response::error('Oturum açmanız gerekiyor', 401);
             }
 
-            // İlan var mı kontrol et
+            // İlan var mı kontrol et (kullanıcının kendi ilanı olup olmadığını kontrol et)
             $property = new Property($this->db);
-            $existing_property = $property->getById($id);
+            $existing_property = $property->getByIdForOwner($id, $user_data['user_id']);
             
             if (!$existing_property) {
-                Response::error('İlan bulunamadı', 404);
-            }
-
-            // Sadece ilan sahibi veya admin güncelleyebilir
-            if ($existing_property['user_id'] != $user_data['user_id'] && $user_data['role_id'] != 3) {
-                Response::error('Bu ilanı güncelleme yetkiniz bulunmamaktadır', 403);
+                // Admin ise tüm ilanları güncelleyebilir
+                if ($user_data['role_id'] == 3 || $user_data['role_id'] == 4) {
+                    // Admin için herhangi bir ilanı getir
+                    $query = "SELECT * FROM properties WHERE id = :id";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->bindParam(":id", $id);
+                    $stmt->execute();
+                    $existing_property = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if (!$existing_property) {
+                        Response::error('İlan bulunamadı', 404);
+                    }
+                } else {
+                    Response::error('İlan bulunamadı veya bu ilanı güncelleme yetkiniz bulunmamaktadır', 404);
+                }
             }
 
             // JSON verisini al
@@ -214,8 +239,21 @@ class PropertyController {
                 Response::error('Geçersiz JSON verisi', 400);
             }
 
+            // Debug: Gelen veriyi logla
+            error_log("UPDATE Property ID: $id");
+            error_log("Input furnishing: " . ($input['furnishing'] ?? 'NULL'));
+            error_log("Input heating_type: " . ($input['heating_type'] ?? 'NULL'));
+
+            // Boş string değerlerini NULL'a çevir
+            if (isset($input['furnishing']) && $input['furnishing'] === '') {
+                $input['furnishing'] = null;
+            }
+            if (isset($input['heating_type']) && $input['heating_type'] === '') {
+                $input['heating_type'] = null;
+            }
+
             // Mevcut ilan verilerini al
-            $current_property = $property->getById($id);
+            $current_property = $existing_property;
             
             // Verileri güncelle - sadece gönderilen alanları güncelle
             $property->id = $id;
@@ -276,26 +314,48 @@ class PropertyController {
                 Response::error('Oturum açmanız gerekiyor', 401);
             }
 
-            // İlan var mı kontrol et
+            // İlan var mı kontrol et (kullanıcının kendi ilanı olup olmadığını kontrol et)
             $property = new Property($this->db);
-            $existing_property = $property->getById($id);
+            $existing_property = $property->getByIdForOwner($id, $user_data['user_id']);
             
             if (!$existing_property) {
-                Response::error('İlan bulunamadı', 404);
+                // Admin ise tüm ilanları silebilir
+                if ($user_data['role_id'] == 3 || $user_data['role_id'] == 4) {
+                    // Admin için herhangi bir ilanı getir
+                    $query = "SELECT * FROM properties WHERE id = :id";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->bindParam(":id", $id);
+                    $stmt->execute();
+                    $existing_property = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if (!$existing_property) {
+                        Response::error('İlan bulunamadı', 404);
+                    }
+                } else {
+                    Response::error('İlan bulunamadı veya bu ilanı silme yetkiniz bulunmamaktadır', 404);
+                }
             }
 
-            // Sadece ilan sahibi veya admin silebilir
-            if ($existing_property['user_id'] != $user_data['user_id'] && $user_data['role_id'] != 3) {
-                Response::error('Bu ilanı silme yetkiniz bulunmamaktadır', 403);
-            }
-
-            if ($property->delete($id)) {
-                Response::success([
-                    'property_id' => $id,
-                    'message' => 'İlan başarıyla silindi'
-                ], 'İlan başarıyla silindi');
+            // Kullanıcının kendi ilanını siliyorsa hard delete yap
+            if ($existing_property['user_id'] == $user_data['user_id']) {
+                if ($property->hardDelete($id)) {
+                    Response::success([
+                        'property_id' => $id,
+                        'message' => 'İlan başarıyla silindi'
+                    ], 'İlan başarıyla silindi');
+                } else {
+                    Response::error('İlan silinirken hata oluştu', 500);
+                }
             } else {
-                Response::error('İlan silinirken hata oluştu', 500);
+                // Admin başka kullanıcının ilanını siliyorsa soft delete yap
+                if ($property->delete($id)) {
+                    Response::success([
+                        'property_id' => $id,
+                        'message' => 'İlan başarıyla pasifleştirildi'
+                    ], 'İlan başarıyla pasifleştirildi');
+                } else {
+                    Response::error('İlan silinirken hata oluştu', 500);
+                }
             }
 
         } catch (Exception $e) {

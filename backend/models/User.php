@@ -14,6 +14,9 @@ class User {
     public $password;
     public $phone;
     public $address;
+    public $bio;
+    public $company;
+    public $website;
     public $city_id;
     public $district_id;
     public $neighborhood_id;
@@ -133,22 +136,29 @@ class User {
      */
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
-                  SET name=:name, phone=:phone, address=:address, 
-                      city_id=:city_id, district_id=:district_id, 
-                      neighborhood_id=:neighborhood_id, updated_at=NOW()
+                  SET name=:name, phone=:phone, address=:address, bio=:bio, 
+                      company=:company, website=:website, city_id=:city_id, 
+                      district_id=:district_id, neighborhood_id=:neighborhood_id, 
+                      updated_at=NOW()
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
 
         // Verileri temizle
         $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->phone = htmlspecialchars(strip_tags($this->phone));
-        $this->address = htmlspecialchars(strip_tags($this->address));
+        $this->phone = htmlspecialchars(strip_tags($this->phone ?? ''));
+        $this->address = htmlspecialchars(strip_tags($this->address ?? ''));
+        $this->bio = htmlspecialchars(strip_tags($this->bio ?? ''));
+        $this->company = htmlspecialchars(strip_tags($this->company ?? ''));
+        $this->website = htmlspecialchars(strip_tags($this->website ?? ''));
 
         // Parametreleri bağla
         $stmt->bindParam(":name", $this->name);
         $stmt->bindParam(":phone", $this->phone);
         $stmt->bindParam(":address", $this->address);
+        $stmt->bindParam(":bio", $this->bio);
+        $stmt->bindParam(":company", $this->company);
+        $stmt->bindParam(":website", $this->website);
         $stmt->bindParam(":city_id", $this->city_id);
         $stmt->bindParam(":district_id", $this->district_id);
         $stmt->bindParam(":neighborhood_id", $this->neighborhood_id);

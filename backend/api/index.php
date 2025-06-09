@@ -4,11 +4,8 @@
  * Tüm API istekleri bu dosya üzerinden yönlendirilir
  */
 
-// CORS ayarları - temizle ve yeniden ayarla
-header_remove('Access-Control-Allow-Origin');
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+// Content-Type ayarı
+header("Content-Type: application/json; charset=utf-8");
 
 // OPTIONS isteği için
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -162,6 +159,11 @@ try {
             handlePropertyTypesEndpoint($db, $method, $segments);
             break;
             
+        case 'user':
+            // Kullanıcı endpoint'i
+            handleUserEndpoint($db, $method, $segments);
+            break;
+            
         default:
             Response::notFound('Endpoint bulunamadı: ' . $segments[0]);
     }
@@ -258,10 +260,13 @@ function handleAuthEndpoint($db, $method, $segments) {
             break;
             
         case 'profile':
-            if ($method !== 'PUT') {
-                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            if ($method === 'GET') {
+                $authController->me();
+            } elseif ($method === 'PUT') {
+                $authController->updateProfile();
+            } else {
+                Response::error('Bu endpoint sadece GET ve PUT metodlarını destekler', 405);
             }
-            $authController->updateProfile();
             break;
             
         case 'logout':
@@ -1189,6 +1194,30 @@ function handlePropertyTypesEndpoint($db, $method, $segments) {
             } else {
                 Response::notFound('Emlak tipi endpoint bulunamadı: ' . $action);
             }
+    }
+}
+
+/**
+ * Kullanıcı endpoint'i
+ */
+function handleUserEndpoint($db, $method, $segments) {
+    require_once '../controllers/UserController.php';
+    
+    $userController = new UserController($db);
+    
+    $action = $segments[1] ?? null;
+    
+    switch ($action) {
+        case 'properties':
+            // Kullanıcının ilanları: /api/user/properties
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $userController->getUserProperties();
+            break;
+            
+        default:
+            Response::notFound('Kullanıcı endpoint bulunamadı: ' . $action);
     }
 }
 ?> 
