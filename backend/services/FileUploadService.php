@@ -56,11 +56,14 @@ class FileUploadService {
                 // Resim boyutlarını al
                 $image_info = getimagesize($upload_path);
                 
+                // Relative path oluştur (web erişimi için)
+                $relative_path = str_replace(__DIR__ . '/../../', '', $upload_path);
+                
                 return [
                     'success' => true,
                     'message' => 'Dosya başarıyla yüklendi',
                     'data' => [
-                        'image_path' => $upload_path,
+                        'image_path' => $relative_path,
                         'image_name' => $file_info['original_name'],
                         'image_size' => filesize($upload_path),
                         'image_type' => $file['type'],

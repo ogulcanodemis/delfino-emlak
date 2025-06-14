@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProperty, updateProperty, getPropertyTypes, getCities, getDistricts } from '../services/apiService';
+import { getProperty, updateProperty, getPropertyTypes, getCities, getDistricts, getPropertyImages, uploadPropertyImages, deletePropertyImage, setPrimaryImage } from '../services/apiService';
+import ImageUploader from '../components/ImageUploader';
+import './EditPropertyPage.css';
 
 const EditPropertyPage = ({ user }) => {
   const { id: propertyId } = useParams();
@@ -42,6 +44,11 @@ const EditPropertyPage = ({ user }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  // Fotoğraf yönetimi
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [imageLoading, setImageLoading] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -58,15 +65,17 @@ const EditPropertyPage = ({ user }) => {
       setLoading(true);
       
       // Paralel olarak verileri yükle
-      const [propertyData, propertyTypesData, citiesData] = await Promise.all([
+      const [propertyData, propertyTypesData, citiesData, imagesData] = await Promise.all([
         getProperty(propertyId),
         getPropertyTypes(),
-        getCities()
+        getCities(),
+        getPropertyImages(propertyId)
       ]);
 
       setProperty(propertyData);
       setPropertyTypes(propertyTypesData);
       setCities(citiesData);
+      setExistingImages(imagesData);
 
       // Şehir seçiliyse ilçeleri yükle
       if (propertyData.city_id) {
@@ -108,6 +117,54 @@ const EditPropertyPage = ({ user }) => {
     }
   };
 
+  // Fotoğraf yönetimi fonksiyonları
+  const handleDeleteExistingImage = async (imageId) => {
+    if (!window.confirm('Bu fotoğrafı silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+
+    try {
+      setImageLoading(true);
+      await deletePropertyImage(imageId);
+      
+      // Listeden kaldır
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      setSuccess('Fotoğraf başarıyla silindi!');
+      
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      setError('Fotoğraf silinirken hata oluştu: ' + error.message);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const handleSetPrimaryExisting = async (imageId) => {
+    try {
+      setImageLoading(true);
+      await setPrimaryImage(imageId);
+      
+      // Listede güncelle
+      setExistingImages(prev => prev.map(img => ({
+        ...img,
+        is_primary: img.id === imageId ? 1 : 0
+      })));
+      
+      setSuccess('Ana fotoğraf başarıyla belirlendi!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      setError('Ana fotoğraf belirlenirken hata oluştu: ' + error.message);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const handleNewImagesChange = (images) => {
+    setNewImages(images);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -128,7 +185,15 @@ const EditPropertyPage = ({ user }) => {
         cleanedProperty.heating_type = 'Doğalgaz';
       }
 
+      // İlan bilgilerini güncelle
       await updateProperty(propertyId, cleanedProperty);
+      
+      // Yeni fotoğraflar varsa yükle
+      if (newImages.length > 0) {
+        const imageFiles = newImages.map(img => img.file);
+        await uploadPropertyImages(propertyId, imageFiles);
+      }
+      
       setSuccess('İlan başarıyla güncellendi!');
       
       setTimeout(() => {
@@ -546,6 +611,26 @@ const EditPropertyPage = ({ user }) => {
                 <span>🔄 Takasa Uygun</span>
               </label>
             </div>
+          </div>
+
+          <div className="form-section">
+            <h3>📸 Fotoğraf Yönetimi</h3>
+            
+            {imageLoading && (
+              <div className="loading-overlay">
+                <div className="spinner"></div>
+                <p>Fotoğraf işleniyor...</p>
+              </div>
+            )}
+            
+            <ImageUploader
+              images={newImages}
+              onImagesChange={handleNewImagesChange}
+              existingImages={existingImages}
+              onDeleteExisting={handleDeleteExistingImage}
+              onSetPrimaryExisting={handleSetPrimaryExisting}
+              maxImages={20}
+            />
           </div>
 
           <div className="form-section">

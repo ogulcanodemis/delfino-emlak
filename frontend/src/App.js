@@ -14,9 +14,14 @@ import MyPropertiesPage from './pages/MyPropertiesPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import EditPropertyPage from './pages/EditPropertyPage';
 import AddPropertyPage from './pages/AddPropertyPage';
+import AdminPanelPage from './pages/AdminPanelPage';
+import AdminPropertyDetailPage from './pages/AdminPropertyDetailPage';
+
+// Bileşenler
+import NotificationBell from './components/NotificationBell';
 
 // Servisler
-import { getCurrentUser, logout, isAuthenticated } from './services/apiService';
+import { getCurrentUser, logout, isAuthenticated, canAccessAdminPanel } from './services/apiService';
 
 // Header Component
 function Header({ user, onLogout }) {
@@ -58,11 +63,20 @@ function Header({ user, onLogout }) {
                 ❤️ Favorilerim
               </Link>
             )}
+            {user && canAccessAdminPanel(user) && (
+              <Link 
+                to="/admin" 
+                className={isActive('/admin') ? 'active' : ''}
+              >
+                🛠️ Admin Paneli
+              </Link>
+            )}
           </nav>
           
           <div className="auth-section">
             {user ? (
               <div className="user-menu">
+                <NotificationBell user={user} />
                 <span className="user-name">Merhaba, {user.name}</span>
                 <Link to="/profile" className="btn btn-outline">
                   👤 Profil
@@ -154,6 +168,8 @@ function AppContent() {
           <Route path="/account-settings" element={<AccountSettingsPage user={user} onLogout={handleLogout} />} />
           <Route path="/add-property" element={<AddPropertyPage user={user} />} />
           <Route path="/edit-property/:id" element={<EditPropertyPage user={user} />} />
+          <Route path="/admin" element={<AdminPanelPage user={user} />} />
+          <Route path="/admin/property/:id" element={<AdminPropertyDetailPage user={user} />} />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
         </Routes>

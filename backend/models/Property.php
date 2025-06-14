@@ -42,6 +42,10 @@ class Property {
     public $is_active;
     public $is_featured;
     public $view_count;
+    public $approval_status;
+    public $approved_by;
+    public $approved_at;
+    public $rejection_reason;
     public $created_at;
     public $updated_at;
 
@@ -65,7 +69,7 @@ class Property {
                       garden=:garden, swimming_pool=:swimming_pool, security=:security,
                       air_conditioning=:air_conditioning, internet=:internet,
                       credit_suitable=:credit_suitable, exchange_suitable=:exchange_suitable,
-                      is_active=:is_active, is_featured=:is_featured";
+                      is_active=:is_active, is_featured=:is_featured, approval_status=:approval_status";
 
         $stmt = $this->conn->prepare($query);
 
@@ -107,6 +111,7 @@ class Property {
         $stmt->bindParam(":exchange_suitable", $this->exchange_suitable);
         $stmt->bindParam(":is_active", $this->is_active);
         $stmt->bindParam(":is_featured", $this->is_featured);
+        $stmt->bindParam(":approval_status", $this->approval_status);
 
         if ($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();
@@ -304,7 +309,7 @@ class Property {
      * İlan görsellerini getir
      */
     public function getPropertyImages($property_id) {
-        $query = "SELECT id, image_path as image_url, image_name, alt_text, is_primary, display_order
+        $query = "SELECT id, image_path, image_name, alt_text, is_primary, display_order
                   FROM property_images 
                   WHERE property_id = :property_id 
                   ORDER BY is_primary DESC, display_order ASC";
@@ -312,8 +317,22 @@ class Property {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":property_id", $property_id);
         $stmt->execute();
+        
+        $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Her resim için URL oluştur
+        foreach ($images as &$image) {
+            // Eğer zaten relative path ise direkt kullan
+            if (strpos($image['image_path'], '/') === 0 || strpos($image['image_path'], 'uploads/') === 0) {
+                $image['image_url'] = '/' . ltrim($image['image_path'], '/');
+            } else {
+                // Absolute path ise relative'e çevir
+                $web_path = str_replace(__DIR__ . '/../../', '', $image['image_path']);
+                $image['image_url'] = '/' . str_replace('\\', '/', $web_path);
+            }
+        }
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $images;
     }
 
     /**
@@ -608,6 +627,197 @@ class Property {
         $stmt->bindParam(":city_id", $city_id);
         $stmt->bindParam(":property_type_id", $property_type_id);
         $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Bekleyen onay ilanlarını getir (Admin için)
+     */
+    public function getPendingApprovalProperties($page = 1, $limit = 10) {
+        $offset = ($page - 1) * $limit;
+        
+        $query = "SELECT p.*, 
+                         pt.name as property_type_name,
+                         ps.name as status_name,
+                         c.name as city_name,
+                         d.name as district_name,
+                         n.name as neighborhood_name,
+                         u.name as user_name,
+                         u.email as user_email,
+                         u.phone as user_phone,
+                         (SELECT image_path FROM property_images WHERE property_id = p.id AND is_primary = 1 LIMIT 1) as main_image
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN property_types pt ON p.property_type_id = pt.id
+                  LEFT JOIN property_status ps ON p.status_id = ps.id
+                  LEFT JOIN cities c ON p.city_id = c.id
+                  LEFT JOIN districts d ON p.district_id = d.id
+                  LEFT JOIN neighborhoods n ON p.neighborhood_id = n.id
+                  LEFT JOIN users u ON p.user_id = u.id
+                  WHERE p.approval_status = 'pending'
+                  ORDER BY p.created_at ASC
+                  LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
+        $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Bekleyen onay ilan sayısını getir
+     */
+    public function getPendingApprovalCount() {
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE approval_status = 'pending'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
+
+    /**
+     * İlanı onayla
+     */
+    public function approveProperty($property_id, $admin_id) {
+        try {
+            $query = "UPDATE " . $this->table_name . " 
+                      SET approval_status = 'approved', 
+                          approved_by = :admin_id, 
+                          approved_at = NOW(),
+                          is_active = 1,
+                          rejection_reason = NULL
+                      WHERE id = :property_id";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":property_id", $property_id);
+            $stmt->bindParam(":admin_id", $admin_id);
+            
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * İlanı reddet
+     */
+    public function rejectProperty($property_id, $admin_id, $rejection_reason = null) {
+        try {
+            $query = "UPDATE " . $this->table_name . " 
+                      SET approval_status = 'rejected', 
+                          approved_by = :admin_id, 
+                          approved_at = NOW(),
+                          is_active = 0,
+                          rejection_reason = :rejection_reason
+                      WHERE id = :property_id";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":property_id", $property_id);
+            $stmt->bindParam(":admin_id", $admin_id);
+            $stmt->bindParam(":rejection_reason", $rejection_reason);
+            
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * İlan onay durumunu kontrol et
+     */
+    public function checkApprovalRequired() {
+        try {
+            $query = "SELECT value FROM settings WHERE key_name = 'property_approval_required'";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result && $result['value'] === 'true';
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Onaylanmış ilanları getir (public için)
+     */
+    public function getApprovedProperties($page = 1, $limit = 12, $filters = []) {
+        $offset = ($page - 1) * $limit;
+        
+        $query = "SELECT p.*, 
+                         pt.name as property_type_name,
+                         ps.name as status_name,
+                         c.name as city_name,
+                         d.name as district_name,
+                         n.name as neighborhood_name,
+                         u.name as user_name,
+                         u.phone as user_phone,
+                         (SELECT image_path FROM property_images WHERE property_id = p.id AND is_primary = 1 LIMIT 1) as main_image
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN property_types pt ON p.property_type_id = pt.id
+                  LEFT JOIN property_status ps ON p.status_id = ps.id
+                  LEFT JOIN cities c ON p.city_id = c.id
+                  LEFT JOIN districts d ON p.district_id = d.id
+                  LEFT JOIN neighborhoods n ON p.neighborhood_id = n.id
+                  LEFT JOIN users u ON p.user_id = u.id
+                  WHERE p.is_active = 1 AND p.approval_status = 'approved'";
+
+        // Filtreleri uygula (önceki getAll fonksiyonundaki gibi)
+        $params = [];
+        
+        if (!empty($filters['property_type_id'])) {
+            $query .= " AND p.property_type_id = :property_type_id";
+            $params[':property_type_id'] = $filters['property_type_id'];
+        }
+        
+        if (!empty($filters['status_id'])) {
+            $query .= " AND p.status_id = :status_id";
+            $params[':status_id'] = $filters['status_id'];
+        }
+        
+        if (!empty($filters['city_id'])) {
+            $query .= " AND p.city_id = :city_id";
+            $params[':city_id'] = $filters['city_id'];
+        }
+        
+        if (!empty($filters['district_id'])) {
+            $query .= " AND p.district_id = :district_id";
+            $params[':district_id'] = $filters['district_id'];
+        }
+        
+        if (!empty($filters['min_price'])) {
+            $query .= " AND p.price >= :min_price";
+            $params[':min_price'] = $filters['min_price'];
+        }
+        
+        if (!empty($filters['max_price'])) {
+            $query .= " AND p.price <= :max_price";
+            $params[':max_price'] = $filters['max_price'];
+        }
+        
+        if (!empty($filters['search'])) {
+            $query .= " AND (p.title LIKE :search OR p.description LIKE :search OR p.address LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        // Sıralama
+        $sort = $filters['sort'] ?? 'created_at';
+        $order = $filters['order'] ?? 'DESC';
+        $query .= " ORDER BY p.{$sort} {$order}";
+        
+        $query .= " LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($query);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
+        $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
+        $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

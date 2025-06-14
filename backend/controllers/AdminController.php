@@ -648,4 +648,355 @@ class AdminController {
         
         return round($bytes, $precision) . ' ' . $units[$i];
     }
+
+    // ========== İLAN ONAY SİSTEMİ FONKSİYONLARI ==========
+
+    /**
+     * Bekleyen onay ilanlarını getir
+     */
+    public function getPendingProperties() {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+            
+            require_once __DIR__ . '/../models/Property.php';
+            $property = new Property($this->db);
+            
+            $properties = $property->getPendingApprovalProperties($page, $limit);
+            $total = $property->getPendingApprovalCount();
+            
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Bekleyen onay ilanları başarıyla getirildi',
+                'data' => [
+                    'properties' => $properties,
+                    'pagination' => [
+                        'total' => (int)$total,
+                        'count' => count($properties),
+                        'per_page' => $limit,
+                        'current_page' => $page,
+                        'total_pages' => ceil($total / $limit)
+                    ]
+                ]
+            ]);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * İlanı onayla
+     */
+    public function approveProperty($property_id) {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            require_once __DIR__ . '/../models/Property.php';
+            require_once __DIR__ . '/../models/Notification.php';
+            
+            $property = new Property($this->db);
+            $notification = new Notification($this->db);
+            
+            // İlanı kontrol et
+            $query = "SELECT p.*, u.name as user_name FROM properties p 
+                      LEFT JOIN users u ON p.user_id = u.id 
+                      WHERE p.id = :property_id AND p.approval_status = 'pending'";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':property_id', $property_id);
+            $stmt->execute();
+            
+            $propertyData = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$propertyData) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Bekleyen onay ilanı bulunamadı']);
+                return;
+            }
+            
+            // İlanı onayla
+            if ($property->approveProperty($property_id, $admin->user_id)) {
+                // Kullanıcıya bildirim gönder
+                $notification->sendPropertyApprovalNotification(
+                    $propertyData['user_id'],
+                    $property_id,
+                    $propertyData['title'],
+                    true // approved = true
+                );
+                
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'İlan başarıyla onaylandı ve yayınlandı'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'İlan onaylanırken hata oluştu']);
+            }
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * İlanı reddet
+     */
+    public function rejectProperty($property_id) {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            // JSON verisini al
+            $input = json_decode(file_get_contents('php://input'), true);
+            $rejection_reason = $input['rejection_reason'] ?? 'Belirtilmemiş';
+            
+            require_once __DIR__ . '/../models/Property.php';
+            require_once __DIR__ . '/../models/Notification.php';
+            
+            $property = new Property($this->db);
+            $notification = new Notification($this->db);
+            
+            // İlanı kontrol et
+            $query = "SELECT p.*, u.name as user_name FROM properties p 
+                      LEFT JOIN users u ON p.user_id = u.id 
+                      WHERE p.id = :property_id AND p.approval_status = 'pending'";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':property_id', $property_id);
+            $stmt->execute();
+            
+            $propertyData = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$propertyData) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Bekleyen onay ilanı bulunamadı']);
+                return;
+            }
+            
+            // İlanı reddet
+            if ($property->rejectProperty($property_id, $admin->user_id, $rejection_reason)) {
+                // Kullanıcıya bildirim gönder
+                $notification->sendPropertyApprovalNotification(
+                    $propertyData['user_id'],
+                    $property_id,
+                    $propertyData['title'],
+                    false // approved = false
+                );
+                
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'İlan başarıyla reddedildi'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'İlan reddedilirken hata oluştu']);
+            }
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * İlan onay istatistiklerini getir
+     */
+    public function getApprovalStats() {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            // Bekleyen onay sayısı
+            $pendingQuery = "SELECT COUNT(*) as count FROM properties WHERE approval_status = 'pending'";
+            $stmt = $this->db->prepare($pendingQuery);
+            $stmt->execute();
+            $pending = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            // Onaylanmış ilan sayısı (bugün)
+            $approvedTodayQuery = "SELECT COUNT(*) as count FROM properties 
+                                   WHERE approval_status = 'approved' 
+                                   AND DATE(approved_at) = CURDATE()";
+            $stmt = $this->db->prepare($approvedTodayQuery);
+            $stmt->execute();
+            $approved_today = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            // Reddedilen ilan sayısı (bugün)
+            $rejectedTodayQuery = "SELECT COUNT(*) as count FROM properties 
+                                   WHERE approval_status = 'rejected' 
+                                   AND DATE(approved_at) = CURDATE()";
+            $stmt = $this->db->prepare($rejectedTodayQuery);
+            $stmt->execute();
+            $rejected_today = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            // Toplam onaylanmış ilan sayısı
+            $totalApprovedQuery = "SELECT COUNT(*) as count FROM properties WHERE approval_status = 'approved'";
+            $stmt = $this->db->prepare($totalApprovedQuery);
+            $stmt->execute();
+            $total_approved = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'İlan onay istatistikleri başarıyla getirildi',
+                'data' => [
+                    'pending_count' => (int)$pending,
+                    'approved_today' => (int)$approved_today,
+                    'rejected_today' => (int)$rejected_today,
+                    'total_approved' => (int)$total_approved
+                ]
+            ]);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * İlan onay ayarını değiştir
+     */
+    public function toggleApprovalSetting() {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            // Mevcut ayarı getir
+            $query = "SELECT value FROM settings WHERE key_name = 'property_approval_required'";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $current = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$current) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Ayar bulunamadı']);
+                return;
+            }
+            
+            // Ayarı tersine çevir
+            $new_value = $current['value'] === 'true' ? 'false' : 'true';
+            
+            $updateQuery = "UPDATE settings SET value = :value, updated_at = NOW() 
+                           WHERE key_name = 'property_approval_required'";
+            $stmt = $this->db->prepare($updateQuery);
+            $stmt->bindParam(':value', $new_value);
+            
+            if ($stmt->execute()) {
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'İlan onay ayarı başarıyla güncellendi',
+                    'data' => [
+                        'approval_required' => $new_value === 'true'
+                    ]
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Ayar güncellenirken hata oluştu']);
+            }
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Admin için ilan detayını getir (onay durumu fark etmeksizin)
+     */
+    public function getPropertyForAdmin($property_id) {
+        try {
+            $admin = $this->checkAdminAuth();
+            if (!$admin) return;
+            
+            require_once __DIR__ . '/../models/Property.php';
+            $property = new Property($this->db);
+            
+            // İlan detayını getir (onay durumu kontrolü yapmadan)
+            $query = "SELECT p.*, 
+                             pt.name as property_type_name,
+                             ps.name as status_name,
+                             c.name as city_name,
+                             d.name as district_name,
+                             n.name as neighborhood_name,
+                             u.name as user_name,
+                             u.email as user_email,
+                             u.phone as user_phone,
+                             u.company as user_company
+                      FROM properties p
+                      LEFT JOIN property_types pt ON p.property_type_id = pt.id
+                      LEFT JOIN property_statuses ps ON p.status_id = ps.id
+                      LEFT JOIN cities c ON p.city_id = c.id
+                      LEFT JOIN districts d ON p.district_id = d.id
+                      LEFT JOIN neighborhoods n ON p.neighborhood_id = n.id
+                      LEFT JOIN users u ON p.user_id = u.id
+                      WHERE p.id = :property_id";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':property_id', $property_id);
+            $stmt->execute();
+            
+            $propertyData = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$propertyData) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'İlan bulunamadı']);
+                return;
+            }
+            
+            // İlan resimlerini getir
+            $imagesQuery = "SELECT * FROM property_images WHERE property_id = :property_id ORDER BY display_order ASC, id ASC";
+            $stmt = $this->db->prepare($imagesQuery);
+            $stmt->bindParam(':property_id', $property_id);
+            $stmt->execute();
+            $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Fotoğraf URL'lerini düzenle ve boolean değerleri düzelt
+            foreach ($images as &$image) {
+                // Boolean değerleri düzelt
+                $image['is_primary'] = (bool)$image['is_primary'];
+            }
+            
+            $propertyData['images'] = $images;
+            
+            // Boolean değerleri düzelt
+            $booleanFields = ['balcony', 'elevator', 'parking', 'garden', 'swimming_pool', 
+                             'security', 'air_conditioning', 'internet', 'credit_suitable', 
+                             'exchange_suitable', 'is_active', 'is_featured'];
+            
+            foreach ($booleanFields as $field) {
+                if (isset($propertyData[$field])) {
+                    $propertyData[$field] = (bool)$propertyData[$field];
+                }
+            }
+            
+            // Sayısal değerleri düzelt
+            $numericFields = ['price', 'area', 'rooms', 'bathrooms', 'floor', 'total_floors', 
+                             'building_age', 'view_count'];
+            
+            foreach ($numericFields as $field) {
+                if (isset($propertyData[$field]) && $propertyData[$field] !== null) {
+                    $propertyData[$field] = is_numeric($propertyData[$field]) ? 
+                        (float)$propertyData[$field] : $propertyData[$field];
+                }
+            }
+            
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'İlan detayı başarıyla getirildi',
+                'data' => [
+                    'property' => $propertyData
+                ]
+            ]);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Sunucu hatası: ' . $e->getMessage()]);
+        }
+    }
 }

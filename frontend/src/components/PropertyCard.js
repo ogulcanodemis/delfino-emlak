@@ -22,7 +22,7 @@ const PropertyCard = ({ property, user, onFavoriteToggle, isFavorite }) => {
     <div className="property-card">
       <div className="property-image">
         {property.images && property.images.length > 0 ? (
-          <img src={property.images[0].image_url} alt={property.title} />
+          <img src={`http://localhost/emlak-delfino${property.images[0].image_url}`} alt={property.title} />
         ) : (
           <div className="no-image">
             <span>📷</span>

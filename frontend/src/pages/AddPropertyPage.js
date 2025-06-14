@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProperty, getPropertyTypes, getCities, getDistricts } from '../services/apiService';
+import { createProperty, getPropertyTypes, getCities, getDistricts, uploadPropertyImages } from '../services/apiService';
+import ImageUploader from '../components/ImageUploader';
+import './AddPropertyPage.css';
 
 const AddPropertyPage = ({ user }) => {
   const navigate = useNavigate();
@@ -41,6 +43,7 @@ const AddPropertyPage = ({ user }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     loadInitialData();
@@ -119,8 +122,23 @@ const AddPropertyPage = ({ user }) => {
         cleanedProperty.heating_type = 'Doğalgaz';
       }
 
+      // Önce ilanı oluştur
       const result = await createProperty(cleanedProperty);
-      setSuccess('İlan başarıyla eklendi!');
+      const propertyId = result.property_id;
+      
+      // Eğer fotoğraflar varsa yükle
+      if (images.length > 0) {
+        try {
+          const imageFiles = images.map(img => img.file);
+          await uploadPropertyImages(propertyId, imageFiles);
+          setSuccess('İlan ve fotoğraflar başarıyla eklendi!');
+        } catch (imageError) {
+          console.error('Fotoğraf yükleme hatası:', imageError);
+          setSuccess('İlan eklendi ancak bazı fotoğraflar yüklenemedi. Daha sonra düzenleyebilirsiniz.');
+        }
+      } else {
+        setSuccess('İlan başarıyla eklendi!');
+      }
       
       setTimeout(() => {
         navigate('/my-properties');
@@ -537,6 +555,14 @@ const AddPropertyPage = ({ user }) => {
                 <span>🔄 Takasa Uygun</span>
               </label>
             </div>
+          </div>
+
+          <div className="form-section">
+            <ImageUploader 
+              images={images}
+              onImagesChange={setImages}
+              maxImages={10}
+            />
           </div>
 
           <div className="form-section">

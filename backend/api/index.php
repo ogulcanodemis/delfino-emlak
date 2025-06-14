@@ -17,9 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 require_once '../config/database.php';
 require_once '../utils/Response.php';
 
-// Hata raporlamayı aç (geliştirme aşamasında)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Hata raporlamayı kapat (production için)
+error_reporting(0);
+ini_set('display_errors', 0);
 
 // İstek metodunu al
 $method = $_SERVER['REQUEST_METHOD'];
@@ -914,6 +914,63 @@ function handleAdminEndpoint($db, $method, $segments) {
                 default:
                     Response::notFound('Admin iletişim endpoint bulunamadı: ' . $contact_action);
             }
+            break;
+            
+        case 'pending-properties':
+            // Bekleyen onay ilanları: /api/admin/pending-properties
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $adminController->getPendingProperties();
+            break;
+            
+        case 'approve-property':
+            // İlan onayla: /api/admin/approve-property/{id}
+            if ($method !== 'PUT') {
+                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            }
+            if (!isset($segments[2]) || !is_numeric($segments[2])) {
+                Response::error('Geçerli emlak ID gereklidir', 400);
+            }
+            $adminController->approveProperty($segments[2]);
+            break;
+            
+        case 'reject-property':
+            // İlan reddet: /api/admin/reject-property/{id}
+            if ($method !== 'PUT') {
+                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            }
+            if (!isset($segments[2]) || !is_numeric($segments[2])) {
+                Response::error('Geçerli emlak ID gereklidir', 400);
+            }
+            $adminController->rejectProperty($segments[2]);
+            break;
+            
+        case 'approval-stats':
+            // İlan onay istatistikleri: /api/admin/approval-stats
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            $adminController->getApprovalStats();
+            break;
+            
+        case 'toggle-approval-setting':
+            // İlan onay ayarını değiştir: /api/admin/toggle-approval-setting
+            if ($method !== 'PUT') {
+                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            }
+            $adminController->toggleApprovalSetting();
+            break;
+            
+        case 'property-detail':
+            // Admin için ilan detayı: /api/admin/property-detail/{id}
+            if ($method !== 'GET') {
+                Response::error('Bu endpoint sadece GET metodunu destekler', 405);
+            }
+            if (!isset($segments[2]) || !is_numeric($segments[2])) {
+                Response::error('Geçerli emlak ID gereklidir', 400);
+            }
+            $adminController->getPropertyForAdmin($segments[2]);
             break;
             
         default:

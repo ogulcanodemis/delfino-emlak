@@ -182,14 +182,55 @@ class PropertyController {
             $property->internet = $input['internet'] ?? 0;
             $property->credit_suitable = $input['credit_suitable'] ?? 0;
             $property->exchange_suitable = $input['exchange_suitable'] ?? 0;
-            $property->is_active = 1;
+            
+            // Onay sistemi kontrolü
+            $approval_required = $property->checkApprovalRequired();
+            
+            if ($approval_required) {
+                // Onay gerekli - ilan pending durumunda oluşturulacak
+                $property->approval_status = 'pending';
+                $property->is_active = 0; // Onay beklerken pasif
+            } else {
+                // Onay gerekli değil - direkt onaylanmış olarak oluştur
+                $property->approval_status = 'approved';
+                $property->is_active = 1;
+            }
+            
             $property->is_featured = $input['is_featured'] ?? 0;
 
             if ($property->create()) {
-                Response::success([
-                    'property_id' => $property->id,
-                    'message' => 'İlan başarıyla oluşturuldu'
-                ], 'İlan başarıyla oluşturuldu', 201);
+                // Eğer onay gerekiyorsa admin'lere bildirim gönder
+                if ($approval_required) {
+                    require_once '../models/Notification.php';
+                    $notification = new Notification($this->db);
+                    
+                    // Kullanıcı adını al
+                    $user_query = "SELECT name FROM users WHERE id = :user_id";
+                    $stmt = $this->db->prepare($user_query);
+                    $stmt->bindParam(':user_id', $user_data['user_id']);
+                    $stmt->execute();
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $user_name = $user ? $user['name'] : 'Bilinmeyen Kullanıcı';
+                    
+                    // Admin'lere bildirim gönder
+                    $notification->sendPropertyApprovalRequestNotification(
+                        $property->id, 
+                        $property->title, 
+                        $user_name
+                    );
+                    
+                    Response::success([
+                        'property_id' => $property->id,
+                        'approval_required' => true,
+                        'message' => 'İlan başarıyla oluşturuldu ve onay için gönderildi'
+                    ], 'İlan başarıyla oluşturuldu ve onay için gönderildi', 201);
+                } else {
+                    Response::success([
+                        'property_id' => $property->id,
+                        'approval_required' => false,
+                        'message' => 'İlan başarıyla oluşturuldu ve yayınlandı'
+                    ], 'İlan başarıyla oluşturuldu ve yayınlandı', 201);
+                }
             } else {
                 Response::error('İlan oluşturulurken hata oluştu', 500);
             }

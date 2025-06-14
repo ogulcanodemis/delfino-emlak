@@ -24,6 +24,7 @@ class Notification {
     // Bildirim tipleri
     const TYPE_PROPERTY_APPROVED = 'property_approved';
     const TYPE_PROPERTY_REJECTED = 'property_rejected';
+    const TYPE_PROPERTY_APPROVAL_REQUIRED = 'property_approval_required';
     const TYPE_ROLE_REQUEST = 'role_request';
     const TYPE_ROLE_APPROVED = 'role_approved';
     const TYPE_ROLE_REJECTED = 'role_rejected';
@@ -358,6 +359,49 @@ class Notification {
         $message = "'{$property_title}' başlıklı favori ilanınızda değişiklik yapıldı.";
         
         return $this->create($user_id, $title, $message, self::TYPE_FAVORITE_PROPERTY);
+    }
+
+    /**
+     * Süper admin'e ilan onay talebi bildirimi gönder
+     */
+    public function sendPropertyApprovalRequestNotification($property_id, $property_title, $user_name) {
+        try {
+            // Süper admin kullanıcılarını bul (role_id = 3)
+            $query = "SELECT id FROM users WHERE role_id = 3 AND status = 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $title = "Yeni İlan Onay Talebi";
+            $message = "{$user_name} kullanıcısı '{$property_title}' başlıklı ilan için onay bekliyor.";
+            
+            $success_count = 0;
+            foreach ($admins as $admin) {
+                if ($this->create($admin['id'], $title, $message, self::TYPE_PROPERTY_APPROVAL_REQUIRED, $property_id, 'property')) {
+                    $success_count++;
+                }
+            }
+            
+            return $success_count > 0;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Admin'lere bekleyen onay sayısını getir
+     */
+    public function getPendingApprovalCount() {
+        try {
+            $query = "SELECT COUNT(*) as count FROM properties WHERE approval_status = 'pending'";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result['count'];
+        } catch (Exception $e) {
+            return 0;
+        }
     }
 }
 ?> 

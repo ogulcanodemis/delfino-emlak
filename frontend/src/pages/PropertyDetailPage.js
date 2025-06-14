@@ -147,7 +147,7 @@ const PropertyDetailPage = ({ user }) => {
             <>
               <div className="main-image">
                 <img 
-                  src={currentImage?.image_path} 
+                  src={`http://localhost/emlak-delfino/${currentImage?.image_path}`} 
                   alt={property.title}
                 />
                 {images.length > 1 && (
@@ -177,7 +177,7 @@ const PropertyDetailPage = ({ user }) => {
                   {images.map((image, index) => (
                     <img
                       key={image.id}
-                      src={image.image_path}
+                      src={`http://localhost/emlak-delfino/${image.image_path}`}
                       alt={`${property.title} - ${index + 1}`}
                       className={index === currentImageIndex ? 'active' : ''}
                       onClick={() => setCurrentImageIndex(index)}

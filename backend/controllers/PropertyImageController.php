@@ -253,7 +253,7 @@ class PropertyImageController {
                     $this->propertyImage->image_size = $result['data']['image_size'];
                     $this->propertyImage->image_type = $result['data']['image_type'];
                     $this->propertyImage->alt_text = $result['data']['alt_text'];
-                    $this->propertyImage->is_primary = false; // Çoklu yüklemede ana resim belirlenmez
+                    $this->propertyImage->is_primary = 0; // Çoklu yüklemede ana resim belirlenmez
                     
                     if ($this->propertyImage->create()) {
                         $image_data = $this->propertyImage->getById($this->propertyImage->id);
@@ -557,7 +557,8 @@ class PropertyImageController {
         try {
             // JWT token kontrolü (admin)
             $user = $this->authenticateUser();
-            if (!$user || $user['role'] !== 'super_admin') {
+            $userRole = isset($user['role']) ? $user['role'] : 'user';
+            if (!$user || $userRole !== 'super_admin') {
                 http_response_code(403);
                 echo json_encode([
                     'success' => false,
@@ -618,7 +619,7 @@ class PropertyImageController {
             return [
                 'id' => $decoded['user_id'],
                 'email' => $decoded['email'],
-                'role' => $decoded['role']
+                'role' => isset($decoded['role']) ? $decoded['role'] : 'user'
             ];
         } catch (Exception $e) {
             http_response_code(401);
@@ -633,7 +634,11 @@ class PropertyImageController {
     // Emlak sahipliği kontrolü
     private function checkPropertyOwnership($property_id, $user_id) {
         require_once __DIR__ . '/../models/Property.php';
-        $property = new Property();
+        require_once __DIR__ . '/../config/database.php';
+        
+        $database = new Database();
+        $db = $database->getConnection();
+        $property = new Property($db);
         $property_data = $property->getById($property_id);
         
         return $property_data && $property_data['user_id'] == $user_id;
@@ -641,7 +646,12 @@ class PropertyImageController {
     
     // Resim URL'si oluştur
     private function getImageUrl($image_path) {
-        // uploads klasörünün web erişilebilir yolunu döndür
+        // Eğer zaten relative path ise direkt kullan
+        if (strpos($image_path, '/') === 0 || strpos($image_path, 'uploads/') === 0) {
+            return '/' . ltrim($image_path, '/');
+        }
+        
+        // Absolute path ise relative'e çevir
         $web_path = str_replace(__DIR__ . '/../../', '', $image_path);
         return '/' . str_replace('\\', '/', $web_path);
     }

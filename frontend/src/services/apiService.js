@@ -416,6 +416,97 @@ export const markNotificationAsRead = async (notificationId) => {
   throw new Error('Bildirim okundu olarak işaretlenemedi');
 };
 
+export const getUnreadNotificationCount = async () => {
+  const data = await apiCall('/notifications/unread-count');
+  
+  if (data.status === 'success') {
+    return data.data.count || 0;
+  }
+  
+  throw new Error('Okunmamış bildirim sayısı getirilemedi');
+};
+
+export const markAllNotificationsAsRead = async () => {
+  const data = await apiCall('/notifications/mark-all-read', {
+    method: 'PUT'
+  });
+  
+  if (data.status === 'success') {
+    return true;
+  }
+  
+  throw new Error('Tüm bildirimler okundu olarak işaretlenemedi');
+};
+
+// ============ ADMIN SERVİSLERİ ============
+
+export const getPendingProperties = async (page = 1, limit = 10) => {
+  const data = await apiCall(`/admin/pending-properties?page=${page}&limit=${limit}`);
+  
+  if (data.success) {
+    return data.data;
+  }
+  
+  throw new Error('Bekleyen ilanlar getirilemedi');
+};
+
+export const approveProperty = async (propertyId) => {
+  const data = await apiCall(`/admin/approve-property/${propertyId}`, {
+    method: 'PUT'
+  });
+  
+  if (data.success) {
+    return true;
+  }
+  
+  throw new Error('İlan onaylanamadı');
+};
+
+export const rejectProperty = async (propertyId, rejectionReason) => {
+  const data = await apiCall(`/admin/reject-property/${propertyId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ rejection_reason: rejectionReason })
+  });
+  
+  if (data.success) {
+    return true;
+  }
+  
+  throw new Error('İlan reddedilemedi');
+};
+
+export const getApprovalStats = async () => {
+  const data = await apiCall('/admin/approval-stats');
+  
+  if (data.success) {
+    return data.data;
+  }
+  
+  throw new Error('Onay istatistikleri getirilemedi');
+};
+
+export const toggleApprovalSetting = async () => {
+  const data = await apiCall('/admin/toggle-approval-setting', {
+    method: 'PUT'
+  });
+  
+  if (data.success) {
+    return data.data;
+  }
+  
+  throw new Error('Onay ayarı değiştirilemedi');
+};
+
+export const getPropertyForAdmin = async (propertyId) => {
+  const data = await apiCall(`/admin/property-detail/${propertyId}`);
+  
+  if (data.success) {
+    return data.data.property;
+  }
+  
+  throw new Error('İlan detayı getirilemedi');
+};
+
 // ============ UTILITY FUNCTIONS ============
 
 // Kullanıcı giriş yapmış mı kontrol et
@@ -446,6 +537,18 @@ export const canApproveRoles = (user) => {
   return getUserRole(user) >= 4; // Süper Admin
 };
 
+export const isAdmin = (user) => {
+  return getUserRole(user) === 3; // Sadece Admin
+};
+
+export const isSuperAdmin = (user) => {
+  return getUserRole(user) === 4; // Sadece Süper Admin
+};
+
+export const canAccessAdminPanel = (user) => {
+  return getUserRole(user) >= 3; // Admin ve Süper Admin
+};
+
 // Fiyat formatı
 export const formatPrice = (price) => {
   if (!price) return 'Fiyat belirtilmemiş';
@@ -460,4 +563,92 @@ export const formatPrice = (price) => {
 export const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('tr-TR');
+};
+
+// ============ PROPERTY IMAGE SERVİSLERİ ============
+
+export const uploadPropertyImages = async (propertyId, images) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('Giriş yapmalısınız');
+  }
+
+  const formData = new FormData();
+  formData.append('property_id', propertyId);
+  
+  // Birden çok dosya ekle
+  for (let i = 0; i < images.length; i++) {
+    formData.append('images[]', images[i]);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/property-images/upload-multiple`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    // Response text'ini al
+    const responseText = await response.text();
+    
+    // Boş response kontrolü
+    if (!responseText) {
+      throw new Error('Sunucudan boş yanıt alındı');
+    }
+    
+    // JSON parse etmeye çalış
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse hatası:', parseError);
+      console.error('Response text:', responseText);
+      throw new Error('Sunucudan geçersiz yanıt alındı');
+    }
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Fotoğraflar yüklenemedi');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Fotoğraf yükleme hatası:', error);
+    throw error;
+  }
+};
+
+export const getPropertyImages = async (propertyId) => {
+  const data = await apiCall(`/property-images/property/${propertyId}`);
+  
+  if (data.success) {
+    return data.data || [];
+  }
+  
+  throw new Error('Fotoğraflar getirilemedi');
+};
+
+export const deletePropertyImage = async (imageId) => {
+  const data = await apiCall(`/property-images/${imageId}`, {
+    method: 'DELETE'
+  });
+  
+  if (data.success) {
+    return true;
+  }
+  
+  throw new Error(data.message || 'Fotoğraf silinemedi');
+};
+
+export const setPrimaryImage = async (imageId) => {
+  const data = await apiCall(`/property-images/set-primary/${imageId}`, {
+    method: 'PUT'
+  });
+  
+  if (data.success) {
+    return true;
+  }
+  
+  throw new Error('Ana fotoğraf belirlenemedi');
 }; 

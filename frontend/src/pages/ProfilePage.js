@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateProfile, getUserProfile } from '../services/apiService';
+import { updateProfile, getUserProfile, canAccessAdminPanel } from '../services/apiService';
+import './ProfilePage.css';
 
 const ProfilePage = ({ user, onUserUpdate }) => {
   const navigate = useNavigate();
@@ -183,6 +184,17 @@ const ProfilePage = ({ user, onUserUpdate }) => {
               >
                 🏠 İlanlarım
               </button>
+              
+              {/* Admin Panel Butonu - Sadece süper adminler için */}
+              {user && canAccessAdminPanel(user) && (
+                <button 
+                  onClick={() => navigate('/admin')}
+                  className="btn btn-admin"
+                >
+                  🛠️ Admin Paneli
+                </button>
+              )}
+              
               <button 
                 onClick={() => navigate('/account-settings')}
                 className="btn btn-outline"
