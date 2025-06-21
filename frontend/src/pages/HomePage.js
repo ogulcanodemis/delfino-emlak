@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFeaturedProperties, addToFavorites, removeFromFavorites } from '../services/apiService';
+import { getFeaturedProperties, addToFavorites, removeFromFavorites, getFavoriteIds } from '../services/apiService';
 import PropertyCard from '../components/PropertyCard';
 
 const HomePage = ({ user }) => {
@@ -14,6 +14,14 @@ const HomePage = ({ user }) => {
     loadFeaturedProperties();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      loadFavoriteIds();
+    } else {
+      setFavoriteIds([]);
+    }
+  }, [user]);
+
   const loadFeaturedProperties = async () => {
     try {
       setLoading(true);
@@ -23,6 +31,17 @@ const HomePage = ({ user }) => {
       setError('Öne çıkan ilanlar yüklenirken bir hata oluştu: ' + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFavoriteIds = async () => {
+    try {
+      const favoriteIds = await getFavoriteIds();
+      setFavoriteIds(favoriteIds);
+    } catch (error) {
+      console.error('Favori ID\'leri yüklenirken hata:', error);
+      // Hata durumunda boş array kullan
+      setFavoriteIds([]);
     }
   };
 
@@ -48,12 +67,12 @@ const HomePage = ({ user }) => {
 
   return (
     <div style={{ 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       minHeight: '100vh'
     }}>
       {/* Hero Section */}
       <section style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
         color: 'white',
         padding: '6rem 2rem',
         textAlign: 'center',
@@ -84,9 +103,13 @@ const HomePage = ({ user }) => {
             <div style={{
               fontSize: '5rem',
               marginBottom: '1rem',
-              textShadow: '0 4px 8px rgba(0,0,0,0.3)'
+              textShadow: '0 4px 8px rgba(0,0,0,0.3)',
+              background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
-              🏠
+              ◆
             </div>
             <h1 style={{
               fontSize: '3.5rem',
@@ -105,7 +128,7 @@ const HomePage = ({ user }) => {
               margin: '0 auto 3rem auto',
               lineHeight: '1.6'
             }}>
-              Emlak Delfino ile binlerce ilan arasından size en uygun olanı keşfedin
+              BK Yatırım ile lüks emlak dünyasında size en uygun yatırımı keşfedin
             </p>
           </div>
           
@@ -117,20 +140,20 @@ const HomePage = ({ user }) => {
             animation: 'fadeInUp 0.8s ease-out 0.2s both'
           }}>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(212, 175, 55, 0.1)',
+              backdropFilter: 'blur(20px)',
               padding: '2rem',
               borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transition: 'all 0.3s ease'
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-5px)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.2)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
             }}>
               <div style={{
                 fontSize: '2.5rem',
@@ -150,20 +173,20 @@ const HomePage = ({ user }) => {
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(212, 175, 55, 0.1)',
+              backdropFilter: 'blur(20px)',
               padding: '2rem',
               borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transition: 'all 0.3s ease'
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-5px)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.2)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
             }}>
               <div style={{
                 fontSize: '2.5rem',
@@ -183,20 +206,20 @@ const HomePage = ({ user }) => {
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(212, 175, 55, 0.1)',
+              backdropFilter: 'blur(20px)',
               padding: '2rem',
               borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transition: 'all 0.3s ease'
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-5px)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.2)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
             }}>
               <div style={{
                 fontSize: '2.5rem',
@@ -227,14 +250,14 @@ const HomePage = ({ user }) => {
               onClick={() => navigate('/properties')} 
               style={{
                 background: 'rgba(255, 255, 255, 0.9)',
-                color: '#667eea',
+                color: '#d4af37',
                 border: 'none',
                 padding: '1rem 2.5rem',
                 borderRadius: '50px',
                 fontSize: '1.1rem',
                 fontWeight: '600',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
                 backdropFilter: 'blur(10px)'
               }}
@@ -249,7 +272,7 @@ const HomePage = ({ user }) => {
                 e.target.style.background = 'rgba(255, 255, 255, 0.9)';
               }}
             >
-              🔍 İlanları Keşfet
+              ◇ İlanları Keşfet
             </button>
             {!user && (
               <button 
@@ -263,7 +286,7 @@ const HomePage = ({ user }) => {
                   fontSize: '1.1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   backdropFilter: 'blur(10px)'
                 }}
                 onMouseEnter={(e) => {
@@ -277,7 +300,7 @@ const HomePage = ({ user }) => {
                   e.target.style.borderColor = 'rgba(255, 255, 255, 0.8)';
                 }}
               >
-                🚀 Ücretsiz Üye Ol
+                ◆ Ücretsiz Üye Ol
               </button>
             )}
           </div>
@@ -303,13 +326,13 @@ const HomePage = ({ user }) => {
               fontSize: '3rem',
               marginBottom: '1rem'
             }}>
-              ⭐
+              ◆
             </div>
             <h2 style={{
               fontSize: '2.5rem',
               fontWeight: '700',
               marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -339,7 +362,7 @@ const HomePage = ({ user }) => {
                 width: '60px',
                 height: '60px',
                 border: '4px solid #f3f4f6',
-                borderTop: '4px solid #667eea',
+                borderTop: '4px solid #d4af37',
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite',
                 marginBottom: '1rem'
@@ -386,7 +409,7 @@ const HomePage = ({ user }) => {
                   fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
@@ -397,7 +420,7 @@ const HomePage = ({ user }) => {
                   e.target.style.background = '#dc2626';
                 }}
               >
-                🔄 Tekrar Dene
+                ◇ Tekrar Dene
               </button>
             </div>
           )}
@@ -415,7 +438,7 @@ const HomePage = ({ user }) => {
                     marginBottom: '1.5rem',
                     opacity: 0.6
                   }}>
-                    🏠
+                    ◆
                   </div>
                   <h3 style={{
                     fontSize: '1.8rem',
@@ -435,7 +458,7 @@ const HomePage = ({ user }) => {
                   <button 
                     onClick={() => navigate('/properties')}
                     style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                       color: 'white',
                       border: 'none',
                       padding: '1rem 2rem',
@@ -443,19 +466,19 @@ const HomePage = ({ user }) => {
                       fontSize: '1.1rem',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)'
                     }}
                     onMouseEnter={(e) => {
                       e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.6)';
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.transform = 'translateY(0)';
                       e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
                     }}
                   >
-                    📋 Tüm İlanları Görüntüle
+                    ◇ Tüm İlanları Görüntüle
                   </button>
                 </div>
               ) : (
@@ -473,7 +496,7 @@ const HomePage = ({ user }) => {
                         onClick={() => navigate(`/property/${property.id}`)}
                         style={{
                           cursor: 'pointer',
-                          transition: 'all 0.3s ease',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           animation: `fadeInUp 0.8s ease-out ${0.1 * index}s both`
                         }}
                         onMouseEnter={(e) => {
@@ -500,7 +523,7 @@ const HomePage = ({ user }) => {
                     <button 
                       onClick={() => navigate('/properties')}
                       style={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                         color: 'white',
                         border: 'none',
                         padding: '1rem 2.5rem',
@@ -508,19 +531,19 @@ const HomePage = ({ user }) => {
                         fontSize: '1.1rem',
                         fontWeight: '600',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)'
                       }}
                       onMouseEnter={(e) => {
                         e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                        e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.6)';
                       }}
                       onMouseLeave={(e) => {
                         e.target.style.transform = 'translateY(0)';
                         e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
                       }}
                     >
-                      📋 Tüm İlanları Görüntüle →
+                      ◇ Tüm İlanları Görüntüle →
                     </button>
                   </div>
                 </>
@@ -549,18 +572,18 @@ const HomePage = ({ user }) => {
               fontSize: '3rem',
               marginBottom: '1rem'
             }}>
-              🌟
+              ◆
             </div>
             <h2 style={{
               fontSize: '2.5rem',
               fontWeight: '700',
               marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              Neden Emlak Delfino?
+              Neden BK Yatırım?
             </h2>
             <p style={{
               fontSize: '1.2rem',
@@ -580,32 +603,32 @@ const HomePage = ({ user }) => {
           }}>
             {[
               {
-                icon: '🔍',
+                icon: '◇',
                 title: 'Kolay Arama',
                 description: 'Gelişmiş filtreleme seçenekleri ile istediğiniz evi kolayca bulun'
               },
               {
-                icon: '💰',
+                icon: '◆',
                 title: 'Şeffaf Fiyatlar',
                 description: 'Gizli maliyet yok, tüm fiyatlar net ve şeffaf şekilde gösteriliyor'
               },
               {
-                icon: '📱',
+                icon: '◇',
                 title: 'Mobil Uyumlu',
                 description: 'Her cihazdan kolayca erişim, istediğiniz zaman istediğiniz yerden'
               },
               {
-                icon: '🤝',
+                icon: '◆',
                 title: 'Güvenilir Emlakçılar',
                 description: 'Doğrulanmış ve deneyimli emlakçılarla güvenle iletişime geçin'
               },
               {
-                icon: '❤️',
+                icon: '♡',
                 title: 'Favoriler',
                 description: 'Beğendiğiniz ilanları favorilerinize ekleyin, kaybetmeyin'
               },
               {
-                icon: '📊',
+                icon: '◆',
                 title: 'Detaylı Bilgiler',
                 description: 'Her ilan için kapsamlı bilgiler ve yüksek kaliteli fotoğraflar'
               }
@@ -618,25 +641,25 @@ const HomePage = ({ user }) => {
                   borderRadius: '20px',
                   textAlign: 'center',
                   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid rgba(102, 126, 234, 0.1)',
-                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(212, 175, 55, 0.1)',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   animation: `fadeInUp 0.8s ease-out ${0.1 * index}s both`
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-10px)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.15)';
-                  e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(212, 175, 55, 0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.1)';
                 }}
               >
                 <div style={{
                   fontSize: '3rem',
                   marginBottom: '1.5rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                   borderRadius: '50%',
                   width: '80px',
                   height: '80px',
@@ -644,7 +667,7 @@ const HomePage = ({ user }) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 1.5rem auto',
-                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                  boxShadow: '0 8px 25px rgba(212, 175, 55, 0.3)'
                 }}>
                   {feature.icon}
                 </div>
@@ -672,7 +695,7 @@ const HomePage = ({ user }) => {
       {/* CTA Section */}
       {!user && (
         <section style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
           color: 'white',
           padding: '6rem 2rem',
           textAlign: 'center',
@@ -701,7 +724,7 @@ const HomePage = ({ user }) => {
               fontSize: '4rem',
               marginBottom: '1.5rem'
             }}>
-              🚀
+              ◆
             </div>
             <h2 style={{
               fontSize: '3rem',
@@ -755,14 +778,14 @@ const HomePage = ({ user }) => {
               onClick={() => navigate('/register')}
               style={{
                 background: 'rgba(255, 255, 255, 0.9)',
-                color: '#667eea',
+                color: '#d4af37',
                 border: 'none',
                 padding: '1.25rem 3rem',
                 borderRadius: '50px',
                 fontSize: '1.2rem',
                 fontWeight: '700',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
                 backdropFilter: 'blur(10px)',
                 animation: 'fadeInUp 0.8s ease-out 0.4s both'
@@ -778,7 +801,7 @@ const HomePage = ({ user }) => {
                 e.target.style.background = 'rgba(255, 255, 255, 0.9)';
               }}
             >
-              🎯 Ücretsiz Kayıt Ol
+              ◆ Ücretsiz Kayıt Ol
             </button>
           </div>
         </section>

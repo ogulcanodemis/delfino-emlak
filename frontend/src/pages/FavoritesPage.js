@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFavorites, removeFromFavorites } from '../services/apiService';
 import PropertyCard from '../components/PropertyCard';
+import './FavoritesPage.css';
 
 const FavoritesPage = ({ user }) => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const FavoritesPage = ({ user }) => {
       <div className="page-container">
         <div className="auth-required">
           <div className="auth-required-content">
-            <h2>🔒 Giriş Gerekli</h2>
+            <h2>◆ Giriş Gerekli</h2>
             <p>Favorilerinizi görüntülemek için giriş yapmalısınız.</p>
             <div className="auth-actions">
               <button 
@@ -80,7 +81,7 @@ const FavoritesPage = ({ user }) => {
     <div className="page-container">
       <div className="favorites-page">
         <div className="page-header">
-          <h1>❤️ Favori İlanlarım</h1>
+          <h1>◇ Favori İlanlarım</h1>
           <p>Beğendiğiniz ilanları buradan takip edebilirsiniz.</p>
         </div>
 
@@ -98,7 +99,7 @@ const FavoritesPage = ({ user }) => {
             {favorites.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-content">
-                  <span className="empty-icon">💔</span>
+                  <span className="empty-icon">◇</span>
                   <h3>Henüz favori ilanınız yok</h3>
                   <p>İlanları beğenmeye başlayın, burada görüntüleyin.</p>
                   <button 

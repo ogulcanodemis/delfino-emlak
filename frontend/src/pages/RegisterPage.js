@@ -72,7 +72,7 @@ const RegisterPage = ({ onLogin }) => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -93,17 +93,17 @@ const RegisterPage = ({ onLogin }) => {
           <div style={{
             fontSize: '4rem',
             marginBottom: '1rem',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            🏠
+            ◆
           </div>
           <h1 style={{
             fontSize: '2.5rem',
             fontWeight: '700',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -116,7 +116,7 @@ const RegisterPage = ({ onLogin }) => {
             fontSize: '1.1rem',
             margin: '0'
           }}>
-            Emlak Delfino ailesine katılın
+            BK Yatırım ailesine katılın
           </p>
         </div>
 
@@ -148,7 +148,7 @@ const RegisterPage = ({ onLogin }) => {
                 color: '#374151',
                 fontSize: '0.95rem'
               }}>
-                👤 Ad Soyad *
+                ◆ Ad Soyad *
               </label>
               <input
                 type="text"
@@ -164,12 +164,12 @@ const RegisterPage = ({ onLogin }) => {
                   border: '2px solid #e5e7eb',
                   borderRadius: '12px',
                   fontSize: '1rem',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   background: 'white',
                   outline: 'none',
                   boxSizing: 'border-box'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onFocus={(e) => e.target.style.borderColor = '#d4af37'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
             </div>
@@ -182,7 +182,7 @@ const RegisterPage = ({ onLogin }) => {
                 color: '#374151',
                 fontSize: '0.95rem'
               }}>
-                📧 E-posta *
+                ◇ E-posta *
               </label>
               <input
                 type="email"
@@ -198,12 +198,12 @@ const RegisterPage = ({ onLogin }) => {
                   border: '2px solid #e5e7eb',
                   borderRadius: '12px',
                   fontSize: '1rem',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   background: 'white',
                   outline: 'none',
                   boxSizing: 'border-box'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onFocus={(e) => e.target.style.borderColor = '#d4af37'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
             </div>
@@ -218,7 +218,7 @@ const RegisterPage = ({ onLogin }) => {
               color: '#374151',
               fontSize: '0.95rem'
             }}>
-              📱 Telefon
+              ◇ Telefon
             </label>
             <input
               type="tel"
@@ -233,12 +233,12 @@ const RegisterPage = ({ onLogin }) => {
                 border: '2px solid #e5e7eb',
                 borderRadius: '12px',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 background: 'white',
                 outline: 'none',
                 boxSizing: 'border-box'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#667eea'}
+              onFocus={(e) => e.target.style.borderColor = '#d4af37'}
               onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             />
           </div>
@@ -253,7 +253,7 @@ const RegisterPage = ({ onLogin }) => {
                 color: '#374151',
                 fontSize: '0.95rem'
               }}>
-                🔒 Şifre *
+                ◉ Şifre *
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -270,12 +270,12 @@ const RegisterPage = ({ onLogin }) => {
                     border: '2px solid #e5e7eb',
                     borderRadius: '12px',
                     fontSize: '1rem',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: 'white',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onFocus={(e) => e.target.style.borderColor = '#d4af37'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
                 <button
@@ -292,7 +292,7 @@ const RegisterPage = ({ onLogin }) => {
                     fontSize: '1.2rem'
                   }}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? '◌' : '◌'}
                 </button>
               </div>
             </div>
@@ -305,7 +305,7 @@ const RegisterPage = ({ onLogin }) => {
                 color: '#374151',
                 fontSize: '0.95rem'
               }}>
-                🔒 Şifre Tekrar *
+                ◉ Şifre Tekrar *
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -322,12 +322,12 @@ const RegisterPage = ({ onLogin }) => {
                     border: '2px solid #e5e7eb',
                     borderRadius: '12px',
                     fontSize: '1rem',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: 'white',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onFocus={(e) => e.target.style.borderColor = '#d4af37'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
                 <button
@@ -344,7 +344,7 @@ const RegisterPage = ({ onLogin }) => {
                     fontSize: '1.2rem'
                   }}
                 >
-                  {showConfirmPassword ? '🙈' : '👁️'}
+                  {showConfirmPassword ? '◌' : '◌'}
                 </button>
               </div>
             </div>
@@ -359,7 +359,7 @@ const RegisterPage = ({ onLogin }) => {
               color: '#374151',
               fontSize: '0.95rem'
             }}>
-              🏢 Hesap Türü
+              ◆ Hesap Türü
             </label>
             <select
               name="role_id"
@@ -372,17 +372,17 @@ const RegisterPage = ({ onLogin }) => {
                 border: '2px solid #e5e7eb',
                 borderRadius: '12px',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 background: 'white',
                 outline: 'none',
                 cursor: 'pointer',
                 boxSizing: 'border-box'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#667eea'}
+              onFocus={(e) => e.target.style.borderColor = '#d4af37'}
               onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             >
-              <option value={1}>👤 Kayıtlı Kullanıcı</option>
-              <option value={2}>🏢 Emlakçı</option>
+              <option value={1}>◆ Kayıtlı Kullanıcı</option>
+              <option value={2}>◆ Emlakçı</option>
             </select>
             <p style={{
               fontSize: '0.85rem',
@@ -402,28 +402,28 @@ const RegisterPage = ({ onLogin }) => {
             style={{
               width: '100%',
               padding: '1rem',
-              background: loading ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: loading ? '#9ca3af' : 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
               fontSize: '1.1rem',
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               transform: loading ? 'none' : 'translateY(0)',
-              boxShadow: loading ? 'none' : '0 4px 15px rgba(102, 126, 234, 0.4)',
+              boxShadow: loading ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.4)',
               marginTop: '1rem'
             }}
             onMouseEnter={(e) => {
               if (!loading) {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.6)';
               }
             }}
             onMouseLeave={(e) => {
               if (!loading) {
                 e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+                e.target.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.4)';
               }
             }}
           >
@@ -440,7 +440,7 @@ const RegisterPage = ({ onLogin }) => {
                 Kayıt oluşturuluyor...
               </span>
             ) : (
-              '🚀 Kayıt Ol'
+              '◆ Kayıt Ol'
             )}
           </button>
         </form>
@@ -460,7 +460,7 @@ const RegisterPage = ({ onLogin }) => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#667eea',
+                color: '#d4af37',
                 textDecoration: 'none',
                 cursor: 'pointer',
                 fontWeight: '600',
@@ -477,26 +477,26 @@ const RegisterPage = ({ onLogin }) => {
             type="button"
             onClick={() => navigate('/')}
             style={{
-              background: 'rgba(102, 126, 234, 0.1)',
-              border: '2px solid rgba(102, 126, 234, 0.2)',
-              color: '#667eea',
+              background: 'rgba(212, 175, 55, 0.1)',
+              border: '2px solid rgba(212, 175, 55, 0.2)',
+              color: '#d4af37',
               padding: '0.75rem 1.5rem',
               borderRadius: '12px',
               fontSize: '0.95rem',
               fontWeight: '600',
               cursor: 'pointer',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(102, 126, 234, 0.2)';
-              e.target.style.borderColor = '#667eea';
+              e.target.style.background = 'rgba(212, 175, 55, 0.2)';
+              e.target.style.borderColor = '#d4af37';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(102, 126, 234, 0.1)';
-              e.target.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+              e.target.style.background = 'rgba(212, 175, 55, 0.1)';
+              e.target.style.borderColor = 'rgba(212, 175, 55, 0.2)';
             }}
           >
-            🏠 Ana Sayfaya Dön
+            ◆ Ana Sayfaya Dön
           </button>
         </div>
 

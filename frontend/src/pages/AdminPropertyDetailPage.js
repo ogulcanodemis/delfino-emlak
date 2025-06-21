@@ -115,7 +115,7 @@ const AdminPropertyDetailPage = ({ user }) => {
     return (
       <div className="admin-property-detail-page">
         <div className="error-container">
-          <h2>❌ Hata</h2>
+          <h2>◆ Hata</h2>
           <p>{error}</p>
           <button onClick={() => navigate('/admin')} className="back-btn">
             ← Admin Paneline Dön
@@ -129,7 +129,7 @@ const AdminPropertyDetailPage = ({ user }) => {
     return (
       <div className="admin-property-detail-page">
         <div className="error-container">
-          <h2>📭 İlan Bulunamadı</h2>
+          <h2>◆ İlan Bulunamadı</h2>
           <p>Aradığınız ilan bulunamadı.</p>
           <button onClick={() => navigate('/admin')} className="back-btn">
             ← Admin Paneline Dön
@@ -168,7 +168,7 @@ const AdminPropertyDetailPage = ({ user }) => {
         <div className="property-content">
           <div className="details-grid">
             <div className="detail-section">
-              <h3>🏠 Emlak Bilgileri</h3>
+              <h3>◆ Emlak Bilgileri</h3>
               <div className="detail-group">
                 <div className="detail-item">
                   <span className="label">📍 Konum:</span>
@@ -231,7 +231,7 @@ const AdminPropertyDetailPage = ({ user }) => {
             </div>
 
             <div className="detail-section">
-              <h3>👤 İlan Sahibi Bilgileri</h3>
+              <h3>◆ İlan Sahibi Bilgileri</h3>
               <div className="detail-group">
                 <div className="detail-item">
                   <span className="label">👤 Ad Soyad:</span>
@@ -256,7 +256,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                 )}
               </div>
 
-              <h3>📅 İlan Bilgileri</h3>
+              <h3>◆ İlan Bilgileri</h3>
               <div className="detail-group">
                 <div className="detail-item">
                   <span className="label">📅 Oluşturulma:</span>
@@ -302,7 +302,7 @@ const AdminPropertyDetailPage = ({ user }) => {
 
           {/* Description */}
           <div className="description-section">
-            <h3>📝 Açıklama</h3>
+            <h3>◆ Açıklama</h3>
             <div className="description-content">
               {property.description}
             </div>
@@ -310,30 +310,30 @@ const AdminPropertyDetailPage = ({ user }) => {
 
           {/* Features */}
           <div className="features-section">
-            <h3>🏠 Özellikler</h3>
+            <h3>◆ Özellikler</h3>
             <div className="features-grid">
-              {property.balcony && <span className="feature">🌿 Balkon</span>}
-              {property.elevator && <span className="feature">🛗 Asansör</span>}
-              {property.parking && <span className="feature">🚗 Otopark</span>}
-              {property.garden && <span className="feature">🌳 Bahçe</span>}
-              {property.swimming_pool && <span className="feature">🏊 Havuz</span>}
-              {property.security && <span className="feature">🔒 Güvenlik</span>}
-              {property.air_conditioning && <span className="feature">❄️ Klima</span>}
-              {property.internet && <span className="feature">🌐 İnternet</span>}
-              {property.credit_suitable && <span className="feature">💳 Krediye Uygun</span>}
-              {property.exchange_suitable && <span className="feature">🔄 Takasa Uygun</span>}
+              {property.balcony && <span className="feature">◇ Balkon</span>}
+              {property.elevator && <span className="feature">◇ Asansör</span>}
+              {property.parking && <span className="feature">◇ Otopark</span>}
+              {property.garden && <span className="feature">◇ Bahçe</span>}
+              {property.swimming_pool && <span className="feature">◇ Havuz</span>}
+              {property.security && <span className="feature">◇ Güvenlik</span>}
+              {property.air_conditioning && <span className="feature">◇ Klima</span>}
+              {property.internet && <span className="feature">◇ İnternet</span>}
+              {property.credit_suitable && <span className="feature">◇ Krediye Uygun</span>}
+              {property.exchange_suitable && <span className="feature">◇ Takasa Uygun</span>}
             </div>
           </div>
 
           {/* Images */}
           {property.images && property.images.length > 0 && (
             <div className="images-section">
-              <h3>📷 Resimler ({property.images.length} adet)</h3>
+              <h3>◆ Resimler ({property.images.length} adet)</h3>
               <div className="images-grid">
                 {property.images.map((image, index) => (
                   <div key={index} className="image-item" onClick={() => openImageModal(index)}>
                     <img 
-                      src={`http://localhost/emlak-delfino/backend/${image.image_path}`}
+                      src={`https://bkyatirim.com/backend/${image.image_path}`}
                       alt={`${property.title} - Resim ${index + 1}`}
                       onError={(e) => {
                         e.target.src = '/placeholder-property.jpg';
@@ -341,7 +341,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                     />
                     <div className="image-overlay">
                       <span className="image-number">{index + 1}</span>
-                      {image.is_primary && <span className="primary-badge">⭐ Ana Resim</span>}
+                      {image.is_primary && <span className="primary-badge">◆ Ana Resim</span>}
                     </div>
                   </div>
                 ))}
@@ -357,7 +357,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                 
                 <div className="modal-image-container">
                   <img 
-                    src={`http://localhost/emlak-delfino/backend/${property.images[selectedImageIndex].image_path}`}
+                    src={`https://bkyatirim.com/backend/${property.images[selectedImageIndex].image_path}`}
                     alt={`${property.title} - Resim ${selectedImageIndex + 1}`}
                     onError={(e) => {
                       e.target.src = '/placeholder-property.jpg';
@@ -379,7 +379,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                       {selectedImageIndex + 1} / {property.images.length}
                     </span>
                     {property.images[selectedImageIndex].is_primary && (
-                      <span className="primary-indicator">⭐ Ana Resim</span>
+                      <span className="primary-indicator">◆ Ana Resim</span>
                     )}
                   </div>
                   

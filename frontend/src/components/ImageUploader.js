@@ -124,7 +124,7 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 10, existingImages 
           {existingImages.map((image) => (
             <div key={`existing-${image.id}`} className={`image-item ${image.is_primary ? 'primary' : ''}`}>
               <div className="image-preview">
-                <img src={`http://localhost/emlak-delfino/${image.image_path}`} alt={image.alt_text || 'Property image'} />
+                <img src={`https://bkyatirim.com/${image.image_path}`} alt={image.alt_text || 'Property image'} />
                 
                 {/* Primary Badge */}
                 {image.is_primary && (

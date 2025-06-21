@@ -8,7 +8,8 @@ import {
   getDistricts,
   formatPrice,
   addToFavorites,
-  removeFromFavorites
+  removeFromFavorites,
+  getFavoriteIds
 } from '../services/apiService';
 import PropertyCard from '../components/PropertyCard';
 
@@ -62,6 +63,25 @@ const PropertiesPage = ({ user }) => {
 
     loadInitialData();
   }, []);
+
+  // Kullanıcı favori ID'lerini yükle
+  useEffect(() => {
+    if (user) {
+      loadFavoriteIds();
+    } else {
+      setFavoriteIds([]);
+    }
+  }, [user]);
+
+  const loadFavoriteIds = async () => {
+    try {
+      const favoriteIds = await getFavoriteIds();
+      setFavoriteIds(favoriteIds);
+    } catch (error) {
+      console.error('Favori ID\'leri yüklenirken hata:', error);
+      setFavoriteIds([]);
+    }
+  };
 
   // İlanları yükle
   useEffect(() => {
@@ -138,13 +158,18 @@ const PropertiesPage = ({ user }) => {
     });
   };
 
-  const handleFavoriteToggle = (propertyId, isFavorite) => {
-    if (isFavorite) {
-      removeFromFavorites(user.id, propertyId);
-      setFavoriteIds(prev => prev.filter(id => id !== propertyId));
-    } else {
-      addToFavorites(user.id, propertyId);
-      setFavoriteIds(prev => [...prev, propertyId]);
+  const handleFavoriteToggle = async (propertyId, isFavorite) => {
+    try {
+      if (isFavorite) {
+        await removeFromFavorites(propertyId);
+        setFavoriteIds(prev => prev.filter(id => id !== propertyId));
+      } else {
+        await addToFavorites(propertyId);
+        setFavoriteIds(prev => [...prev, propertyId]);
+      }
+    } catch (error) {
+      console.error('Favori işlemi sırasında hata:', error);
+      alert('Favori işlemi sırasında bir hata oluştu: ' + error.message);
     }
   };
 
@@ -176,13 +201,13 @@ const PropertiesPage = ({ user }) => {
             fontSize: '4rem',
             marginBottom: '1rem'
           }}>
-            🏠
+            ◆
           </div>
           <h1 style={{
             fontSize: '3rem',
             fontWeight: '700',
             marginBottom: '1rem',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -234,7 +259,7 @@ const PropertiesPage = ({ user }) => {
           padding: '2rem',
           marginBottom: '2rem',
           boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(102, 126, 234, 0.1)',
+          border: '1px solid rgba(212, 175, 55, 0.1)',
           animation: 'fadeInUp 0.8s ease-out 0.2s both'
         }}>
           {/* Filtre Header */}
@@ -260,10 +285,10 @@ const PropertiesPage = ({ user }) => {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                🔍 Filtreler
+                ◇ Filtreler
                 {getActiveFilterCount() > 0 && (
                   <span style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                     color: 'white',
                     fontSize: '0.8rem',
                     padding: '0.25rem 0.75rem',
@@ -279,22 +304,22 @@ const PropertiesPage = ({ user }) => {
             <button
               onClick={() => setShowFilters(!showFilters)}
               style={{
-                background: showFilters ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
-                color: showFilters ? 'white' : '#667eea',
-                border: `2px solid ${showFilters ? 'transparent' : '#667eea'}`,
+                background: showFilters ? 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)' : 'transparent',
+                color: showFilters ? 'white' : '#d4af37',
+                border: `2px solid ${showFilters ? 'transparent' : '#d4af37'}`,
                 padding: '0.75rem 1.5rem',
                 borderRadius: '12px',
                 fontSize: '1rem',
                 fontWeight: '600',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
               }}
               onMouseEnter={(e) => {
                 if (!showFilters) {
-                  e.target.style.background = 'rgba(102, 126, 234, 0.1)';
+                  e.target.style.background = 'rgba(212, 175, 55, 0.1)';
                 }
               }}
               onMouseLeave={(e) => {
@@ -303,7 +328,7 @@ const PropertiesPage = ({ user }) => {
                 }
               }}
             >
-              {showFilters ? '🔼' : '🔽'} {showFilters ? 'Gizle' : 'Göster'}
+              {showFilters ? '▲' : '▼'} {showFilters ? 'Gizle' : 'Göster'}
             </button>
           </div>
 
@@ -321,7 +346,7 @@ const PropertiesPage = ({ user }) => {
               }}>
                 <input
                   type="text"
-                  placeholder="🔍 İlan başlığı, açıklama veya konum ara..."
+                  placeholder="◇ İlan başlığı, açıklama veya konum ara..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                   style={{
@@ -330,13 +355,13 @@ const PropertiesPage = ({ user }) => {
                     borderRadius: '12px',
                     border: '2px solid #e5e7eb',
                     fontSize: '1.1rem',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: '#f9fafb'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
+                    e.target.style.borderColor = '#d4af37';
                     e.target.style.background = 'white';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -374,11 +399,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -415,13 +440,13 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: filters.city_id ? 'white' : '#f3f4f6',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     opacity: filters.city_id ? 1 : 0.6
                   }}
                   onFocus={(e) => {
                     if (filters.city_id) {
-                      e.target.style.borderColor = '#667eea';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                      e.target.style.borderColor = '#d4af37';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                     }
                   }}
                   onBlur={(e) => {
@@ -466,11 +491,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -494,7 +519,7 @@ const PropertiesPage = ({ user }) => {
                   color: '#374151',
                   fontSize: '1rem'
                 }}>
-                  📋 Durum
+                  ◇ Durum
                 </label>
                 <select
                   value={filters.status_id}
@@ -506,11 +531,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -518,8 +543,8 @@ const PropertiesPage = ({ user }) => {
                   }}
                 >
                   <option value="">Tümü</option>
-                  <option value="1">💰 Satılık</option>
-                  <option value="2">🏠 Kiralık</option>
+                  <option value="1">◆ Satılık</option>
+                  <option value="2">◆ Kiralık</option>
                 </select>
               </div>
 
@@ -543,11 +568,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -580,7 +605,7 @@ const PropertiesPage = ({ user }) => {
                     color: '#374151',
                     fontSize: '1rem'
                   }}>
-                    💰 Min Fiyat
+                    ◆ Min Fiyat
                   </label>
                   <input
                     type="number"
@@ -594,11 +619,11 @@ const PropertiesPage = ({ user }) => {
                       border: '2px solid #e5e7eb',
                       fontSize: '1rem',
                       background: 'white',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#667eea';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                      e.target.style.borderColor = '#d4af37';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                     }}
                     onBlur={(e) => {
                       e.target.style.borderColor = '#e5e7eb';
@@ -614,7 +639,7 @@ const PropertiesPage = ({ user }) => {
                     color: '#374151',
                     fontSize: '1rem'
                   }}>
-                    💰 Max Fiyat
+                    ◆ Max Fiyat
                   </label>
                   <input
                     type="number"
@@ -628,11 +653,11 @@ const PropertiesPage = ({ user }) => {
                       border: '2px solid #e5e7eb',
                       fontSize: '1rem',
                       background: 'white',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#667eea';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                      e.target.style.borderColor = '#d4af37';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                     }}
                     onBlur={(e) => {
                       e.target.style.borderColor = '#e5e7eb';
@@ -671,11 +696,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -705,11 +730,11 @@ const PropertiesPage = ({ user }) => {
                     border: '2px solid #e5e7eb',
                     fontSize: '1rem',
                     background: 'white',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                    e.target.style.borderColor = '#d4af37';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#e5e7eb';
@@ -737,7 +762,7 @@ const PropertiesPage = ({ user }) => {
                   fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
@@ -771,7 +796,7 @@ const PropertiesPage = ({ user }) => {
               width: '80px',
               height: '80px',
               border: '6px solid #f3f4f6',
-              borderTop: '6px solid #667eea',
+              borderTop: '6px solid #d4af37',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
               marginBottom: '2rem'
@@ -800,7 +825,7 @@ const PropertiesPage = ({ user }) => {
               padding: '1.5rem',
               marginBottom: '2rem',
               boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
-              border: '1px solid rgba(102, 126, 234, 0.1)',
+              border: '1px solid rgba(212, 175, 55, 0.1)',
               animation: 'fadeInUp 0.8s ease-out 0.3s both'
             }}>
               <div style={{
@@ -820,8 +845,8 @@ const PropertiesPage = ({ user }) => {
                     alignItems: 'center',
                     gap: '0.5rem'
                   }}>
-                    📊 <strong style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    ◆ <strong style={{
+                      background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text'
@@ -870,7 +895,7 @@ const PropertiesPage = ({ user }) => {
                       onClick={() => navigate(`/property/${property.id}`)}
                       style={{
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         animation: `fadeInUp 0.8s ease-out ${0.1 * index}s both`
                       }}
                       onMouseEnter={(e) => {
@@ -905,29 +930,29 @@ const PropertiesPage = ({ user }) => {
                       padding: '1rem',
                       borderRadius: '16px',
                       boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                      border: '1px solid rgba(212, 175, 55, 0.1)'
                     }}>
                       {pagination.current_page > 1 && (
                         <button 
                           onClick={() => handlePageChange(pagination.current_page - 1)}
                           style={{
                             background: 'transparent',
-                            color: '#667eea',
-                            border: '2px solid #667eea',
+                            color: '#d4af37',
+                            border: '2px solid #d4af37',
                             padding: '0.75rem 1.5rem',
                             borderRadius: '12px',
                             fontSize: '1rem',
                             fontWeight: '600',
                             cursor: 'pointer',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.background = '#667eea';
+                            e.target.style.background = '#d4af37';
                             e.target.style.color = 'white';
                           }}
                           onMouseLeave={(e) => {
                             e.target.style.background = 'transparent';
-                            e.target.style.color = '#667eea';
+                            e.target.style.color = '#d4af37';
                           }}
                         >
                           ← Önceki
@@ -942,20 +967,20 @@ const PropertiesPage = ({ user }) => {
                             key={page}
                             onClick={() => handlePageChange(page)}
                             style={{
-                              background: isActive ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
-                              color: isActive ? 'white' : '#667eea',
-                              border: `2px solid ${isActive ? 'transparent' : '#667eea'}`,
+                              background: isActive ? 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)' : 'transparent',
+                              color: isActive ? 'white' : '#d4af37',
+                              border: `2px solid ${isActive ? 'transparent' : '#d4af37'}`,
                               padding: '0.75rem 1rem',
                               borderRadius: '12px',
                               fontSize: '1rem',
                               fontWeight: '600',
                               cursor: 'pointer',
-                              transition: 'all 0.3s ease',
+                              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                               minWidth: '50px'
                             }}
                             onMouseEnter={(e) => {
                               if (!isActive) {
-                                e.target.style.background = 'rgba(102, 126, 234, 0.1)';
+                                e.target.style.background = 'rgba(212, 175, 55, 0.1)';
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -974,22 +999,22 @@ const PropertiesPage = ({ user }) => {
                           onClick={() => handlePageChange(pagination.current_page + 1)}
                           style={{
                             background: 'transparent',
-                            color: '#667eea',
-                            border: '2px solid #667eea',
+                            color: '#d4af37',
+                            border: '2px solid #d4af37',
                             padding: '0.75rem 1.5rem',
                             borderRadius: '12px',
                             fontSize: '1rem',
                             fontWeight: '600',
                             cursor: 'pointer',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.background = '#667eea';
+                            e.target.style.background = '#d4af37';
                             e.target.style.color = 'white';
                           }}
                           onMouseLeave={(e) => {
                             e.target.style.background = 'transparent';
-                            e.target.style.color = '#667eea';
+                            e.target.style.color = '#d4af37';
                           }}
                         >
                           Sonraki →
@@ -1006,7 +1031,7 @@ const PropertiesPage = ({ user }) => {
                 padding: '4rem 2rem',
                 textAlign: 'center',
                 boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(102, 126, 234, 0.1)',
+                border: '1px solid rgba(212, 175, 55, 0.1)',
                 animation: 'fadeIn 0.5s ease-out'
               }}>
                 <div style={{
@@ -1014,7 +1039,7 @@ const PropertiesPage = ({ user }) => {
                   marginBottom: '1.5rem',
                   opacity: 0.6
                 }}>
-                  🔍
+                  ◇
                 </div>
                 <h3 style={{
                   fontSize: '2rem',
@@ -1036,7 +1061,7 @@ const PropertiesPage = ({ user }) => {
                 <button 
                   onClick={clearFilters}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
                     color: 'white',
                     border: 'none',
                     padding: '1rem 2rem',
@@ -1044,16 +1069,16 @@ const PropertiesPage = ({ user }) => {
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'translateY(-2px)';
-                    e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.6)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.4)';
                   }}
                 >
                   🗑️ Filtreleri Temizle

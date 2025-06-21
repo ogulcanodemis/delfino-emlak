@@ -127,7 +127,7 @@ const PropertyDetailPage = ({ user }) => {
                 onClick={handleFavoriteToggle}
                 className={`favorite-btn ${isFavorite ? 'active' : ''}`}
               >
-                {isFavorite ? '❤️ Favorilerden Çıkar' : '🤍 Favorilere Ekle'}
+                {isFavorite ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
               </button>
             )}
             
@@ -136,67 +136,77 @@ const PropertyDetailPage = ({ user }) => {
               className="report-btn"
               title="İlanı Rapor Et"
             >
-              🚨 Rapor Et
+              ⚠ Rapor Et
             </button>
           </div>
         </div>
 
-        {/* Image Gallery */}
-        <div className="property-gallery">
-          {images.length > 0 ? (
-            <>
-              <div className="main-image">
-                <img 
-                  src={`http://localhost/emlak-delfino/${currentImage?.image_path}`} 
-                  alt={property.title}
-                />
-                {images.length > 1 && (
-                  <>
-                    <button 
-                      className="gallery-nav prev"
-                      onClick={() => setCurrentImageIndex(
-                        currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1
-                      )}
-                    >
-                      ‹
-                    </button>
-                    <button 
-                      className="gallery-nav next"
-                      onClick={() => setCurrentImageIndex(
-                        currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1
-                      )}
-                    >
-                      ›
-                    </button>
-                  </>
-                )}
-              </div>
-              
-              {images.length > 1 && (
-                <div className="image-thumbnails">
-                  {images.map((image, index) => (
-                    <img
-                      key={image.id}
-                      src={`http://localhost/emlak-delfino/${image.image_path}`}
-                      alt={`${property.title} - ${index + 1}`}
-                      className={index === currentImageIndex ? 'active' : ''}
-                      onClick={() => setCurrentImageIndex(index)}
+        {/* Main Content Layout */}
+        <div className="property-content-layout">
+          {/* Left Side - Image Gallery + Description */}
+          <div className="property-gallery-section">
+            <div className="property-gallery">
+              {images.length > 0 ? (
+                <>
+                  <div className="main-image">
+                    <img 
+                      src={`https://bkyatirim.com/${currentImage?.image_path}`} 
+                      alt={property.title}
                     />
-                  ))}
+                    {images.length > 1 && (
+                      <>
+                        <button 
+                          className="gallery-nav prev"
+                          onClick={() => setCurrentImageIndex(
+                            currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1
+                          )}
+                        >
+                          ‹
+                        </button>
+                        <button 
+                          className="gallery-nav next"
+                          onClick={() => setCurrentImageIndex(
+                            currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1
+                          )}
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  
+                  {images.length > 1 && (
+                    <div className="image-thumbnails">
+                      {images.map((image, index) => (
+                        <img
+                          key={image.id}
+                          src={`https://bkyatirim.com/${image.image_path}`}
+                          alt={`${property.title} - ${index + 1}`}
+                          className={index === currentImageIndex ? 'active' : ''}
+                          onClick={() => setCurrentImageIndex(index)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-images">
+                  <span>○</span>
+                  <p>Bu ilan için fotoğraf bulunmuyor</p>
                 </div>
               )}
-            </>
-          ) : (
-            <div className="no-images">
-              <span>📷</span>
-              <p>Bu ilan için fotoğraf bulunmuyor</p>
             </div>
-          )}
-        </div>
+            
+            {/* Property Description - Moved here for better UX */}
+            <div className="property-description">
+              <h3>◆ Açıklama</h3>
+              <p>{property.description || 'Bu ilan için açıklama bulunmuyor.'}</p>
+            </div>
+          </div>
 
-        {/* Property Info */}
-        <div className="property-content">
-          <div className="property-main">
+          {/* Right Side - Property Info */}
+          <div className="property-info-section">
+            <div className="property-main">
             <div className="property-title-section">
               <h1>{property.title}</h1>
               <div className="property-badges">
@@ -217,19 +227,14 @@ const PropertyDetailPage = ({ user }) => {
             </div>
 
             <div className="property-location-section">
-              <h3>📍 Konum</h3>
+              <h3>◉ Konum</h3>
               <p>{property.address}</p>
               <p>{property.neighborhood_name && `${property.neighborhood_name}, `}
                  {property.district_name}, {property.city_name}</p>
             </div>
 
-            <div className="property-description">
-              <h3>📝 Açıklama</h3>
-              <p>{property.description || 'Bu ilan için açıklama bulunmuyor.'}</p>
-            </div>
-
             <div className="property-features">
-              <h3>🏠 Özellikler</h3>
+              <h3>◆ Özellikler</h3>
               <div className="features-grid">
                 <div className="feature-item">
                   <span className="feature-label">Emlak Tipi:</span>
@@ -295,35 +300,50 @@ const PropertyDetailPage = ({ user }) => {
             </div>
 
             <div className="property-amenities">
-              <h3>✨ Özellikler</h3>
+              <h3>◇ Özellikler</h3>
               <div className="amenities-grid">
-                {property.balcony && <span className="amenity">🏡 Balkon</span>}
-                {property.elevator && <span className="amenity">🛗 Asansör</span>}
-                {property.parking && <span className="amenity">🚗 Otopark</span>}
-                {property.garden && <span className="amenity">🌳 Bahçe</span>}
-                {property.swimming_pool && <span className="amenity">🏊 Havuz</span>}
-                {property.security && <span className="amenity">🔒 Güvenlik</span>}
-                {property.air_conditioning && <span className="amenity">❄️ Klima</span>}
-                {property.internet && <span className="amenity">🌐 İnternet</span>}
+                
+                {Boolean(property.balcony) && <span className="amenity">🏡 Balkon</span>}
+                {Boolean(property.elevator) && <span className="amenity">🛗 Asansör</span>}
+                {Boolean(property.parking) && <span className="amenity">🚗 Otopark</span>}
+                {Boolean(property.garden) && <span className="amenity">🌳 Bahçe</span>}
+                {Boolean(property.swimming_pool) && <span className="amenity">🏊 Havuz</span>}
+                {Boolean(property.security) && <span className="amenity">🔒 Güvenlik</span>}
+                {Boolean(property.air_conditioning) && <span className="amenity">❄️ Klima</span>}
+                {Boolean(property.internet) && <span className="amenity">🌐 İnternet</span>}
+                {Boolean(property.credit_suitable) && <span className="amenity">◇ Krediye Uygun</span>}
+                {Boolean(property.exchange_suitable) && <span className="amenity">◇ Takasa Uygun</span>}
+                
+                {/* Show message if no features available */}
+                {!Boolean(property.balcony) && 
+                 !Boolean(property.elevator) && 
+                 !Boolean(property.parking) && 
+                 !Boolean(property.garden) && 
+                 !Boolean(property.swimming_pool) && 
+                 !Boolean(property.security) && 
+                 !Boolean(property.air_conditioning) && 
+                 !Boolean(property.internet) && 
+                 !Boolean(property.credit_suitable) && 
+                 !Boolean(property.exchange_suitable) && (
+                  <span className="no-amenities">Bu ilan için özellik bilgisi bulunmuyor.</span>
+                )}
               </div>
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="property-sidebar">
+            {/* Agent Card - Only show to logged in users */}
             {canSeePrice && property.user_name && (
               <div className="agent-card">
-                <h3>👤 İlan Sahibi</h3>
+                <h3>◉ İlan Sahibi</h3>
                 <div className="agent-info">
                   <p className="agent-name">{property.user_name}</p>
                   {property.user_phone && (
                     <p className="agent-phone">
-                      📞 <a href={`tel:${property.user_phone}`}>{property.user_phone}</a>
+                      ☏ <a href={`tel:${property.user_phone}`}>{property.user_phone}</a>
                     </p>
                   )}
                   {property.user_email && (
                     <p className="agent-email">
-                      ✉️ <a href={`mailto:${property.user_email}`}>{property.user_email}</a>
+                      ✉ <a href={`mailto:${property.user_email}`}>{property.user_email}</a>
                     </p>
                   )}
                 </div>
@@ -333,16 +353,16 @@ const PropertyDetailPage = ({ user }) => {
                     onClick={() => setShowContactForm(true)} 
                     className="btn btn-primary"
                   >
-                    📧 Mesaj Gönder
+                    ✉ Mesaj Gönder
                   </button>
                   {property.user_phone && (
                     <a href={`tel:${property.user_phone}`} className="btn btn-secondary">
-                      📞 Ara
+                      ☏ Ara
                     </a>
                   )}
                   {property.user_email && (
                     <a href={`mailto:${property.user_email}`} className="btn btn-outline">
-                      ✉️ E-posta
+                      ✉ E-posta
                     </a>
                   )}
                 </div>
@@ -350,7 +370,7 @@ const PropertyDetailPage = ({ user }) => {
             )}
 
             <div className="property-stats">
-              <h3>📊 İstatistikler</h3>
+              <h3>◆ İstatistikler</h3>
               <div className="stat-item">
                 <span className="stat-label">Görüntülenme:</span>
                 <span className="stat-value">{property.view_count}</span>
@@ -368,7 +388,7 @@ const PropertyDetailPage = ({ user }) => {
             </div>
 
             <div className="social-share">
-              <h3>📤 Paylaş</h3>
+              <h3>◇ Paylaş</h3>
               <div className="share-buttons">
                 <a 
                   href={`https://wa.me/?text=${encodeURIComponent(`${property.title} - ${window.location.href}`)}`}
@@ -377,7 +397,7 @@ const PropertyDetailPage = ({ user }) => {
                   className="share-btn whatsapp"
                   title="WhatsApp'ta Paylaş"
                 >
-                  📱 WhatsApp
+                  ◇ WhatsApp
                 </a>
                 
                 <a 
@@ -387,7 +407,7 @@ const PropertyDetailPage = ({ user }) => {
                   className="share-btn facebook"
                   title="Facebook'ta Paylaş"
                 >
-                  📘 Facebook
+                  ◇ Facebook
                 </a>
                 
                 <a 
@@ -397,7 +417,7 @@ const PropertyDetailPage = ({ user }) => {
                   className="share-btn twitter"
                   title="Twitter'da Paylaş"
                 >
-                  🐦 Twitter
+                  ◇ Twitter
                 </a>
                 
                 <button 
@@ -405,7 +425,7 @@ const PropertyDetailPage = ({ user }) => {
                     if (navigator.share) {
                       navigator.share({
                         title: property.title,
-                        text: `${property.title} - Emlak-Delfino`,
+                        text: `${property.title} - BK Yatırım`,
                         url: window.location.href
                       });
                     } else {
@@ -416,12 +436,14 @@ const PropertyDetailPage = ({ user }) => {
                   className="share-btn copy"
                   title="Linki Kopyala"
                 >
-                  🔗 Linki Kopyala
+                  ◇ Linki Kopyala
                 </button>
               </div>
             </div>
+            </div>
           </div>
         </div>
+
 
         {/* Similar Properties */}
         <SimilarProperties 

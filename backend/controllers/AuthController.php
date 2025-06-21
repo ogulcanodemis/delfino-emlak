@@ -279,5 +279,87 @@ class AuthController {
         // Şimdilik sadece başarılı mesaj döndürüyoruz
         Response::success(null, 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi');
     }
+
+    public function changePassword() {
+        // JWT token kontrolü - me() methodundaki gibi
+        $headers = getallheaders();
+        $auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+
+        if (!$auth_header || !preg_match('/Bearer\s+(.*)$/i', $auth_header, $matches)) {
+            Response::error('Token bulunamadı', 401);
+            return;
+        }
+
+        $token = $matches[1];
+        $payload = JWT::decode($token);
+        if (!$payload) {
+            Response::error('Geçersiz token', 401);
+            return;
+        }
+
+        // POST verilerini al
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Gerekli alanları kontrol et
+        if (!isset($input['current_password']) || !isset($input['new_password'])) {
+            Response::validationError(['message' => 'Mevcut şifre ve yeni şifre gereklidir']);
+            return;
+        }
+
+        $current_password = trim($input['current_password']);
+        $new_password = trim($input['new_password']);
+
+        // Şifre uzunluğunu kontrol et
+        if (strlen($new_password) < 6) {
+            Response::validationError(['message' => 'Yeni şifre en az 6 karakter olmalıdır']);
+            return;
+        }
+
+        try {
+            // Mevcut şifreyi doğrula
+            if (!$this->user->verifyPasswordById($payload['user_id'], $current_password)) {
+                Response::validationError(['message' => 'Mevcut şifre hatalı']);
+                return;
+            }
+
+            // Şifreyi güncelle
+            if ($this->user->updatePasswordById($payload['user_id'], $new_password)) {
+                Response::success(null, 'Şifre başarıyla değiştirildi');
+            } else {
+                Response::error('Şifre değiştirilemedi', 500);
+            }
+        } catch (Exception $e) {
+            Response::error('Şifre değiştirme sırasında hata oluştu: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteAccount() {
+        // JWT token kontrolü - me() methodundaki gibi
+        $headers = getallheaders();
+        $auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+
+        if (!$auth_header || !preg_match('/Bearer\s+(.*)$/i', $auth_header, $matches)) {
+            Response::error('Token bulunamadı', 401);
+            return;
+        }
+
+        $token = $matches[1];
+        $payload = JWT::decode($token);
+        if (!$payload) {
+            Response::error('Geçersiz token', 401);
+            return;
+        }
+
+        try {
+            // Kullanıcı hesabını sil
+            if ($this->user->deleteAccount($payload['user_id'])) {
+                Response::success(null, 'Hesap başarıyla silindi');
+            } else {
+                Response::error('Hesap silinemedi', 500);
+            }
+        } catch (Exception $e) {
+            Response::error('Hesap silme sırasında hata oluştu: ' . $e->getMessage(), 500);
+        }
+    }
 }
 ?> 

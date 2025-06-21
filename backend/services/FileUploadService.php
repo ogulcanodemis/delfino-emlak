@@ -7,7 +7,7 @@ class FileUploadService {
     private $max_files_per_property;
     
     public function __construct() {
-        $this->upload_path = __DIR__ . '/../../uploads/properties/';
+        $this->upload_path = $_SERVER['DOCUMENT_ROOT'] . '/uploads/properties/';
         $this->allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $this->max_file_size = 5 * 1024 * 1024; // 5MB
         $this->max_files_per_property = 20;

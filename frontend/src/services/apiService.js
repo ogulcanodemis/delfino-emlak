@@ -1,6 +1,6 @@
-// Gerçek API Servisi - Emlak Delfino Backend ile entegrasyon
+// Gerçek API Servisi - BK Yatırım Backend ile entegrasyon
 
-const API_BASE_URL = 'http://localhost/emlak-delfino/backend/api';
+const API_BASE_URL = 'https://bkyatirim.com/backend/api';
 
 // Token yönetimi
 export const getToken = () => {
@@ -337,6 +337,16 @@ export const removeFromFavorites = async (propertyId) => {
   }
   
   throw new Error('Favorilerden çıkarılamadı');
+};
+
+export const getFavoriteIds = async () => {
+  const data = await apiCall('/favorites/ids');
+  
+  if (data.status === 'success') {
+    return data.data.favorite_property_ids || [];
+  }
+  
+  throw new Error('Favori ID\'leri getirilemedi');
 };
 
 // ============ CONTACT SERVİSLERİ ============

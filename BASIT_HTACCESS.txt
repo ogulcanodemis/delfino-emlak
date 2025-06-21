@@ -1,0 +1,33 @@
+# ANA .HTACCESS (domain kök dizini)
+RewriteEngine On
+
+# HTTPS yönlendirmesi
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Backend API yönlendirmesi
+RewriteRule ^backend/api/(.*)$ backend/api/index.php [L,QSA]
+
+# React Router (frontend) - API istekleri hariç
+RewriteCond %{REQUEST_URI} !^/backend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# CORS Headers
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+---
+
+# BACKEND .HTACCESS (backend/ klasöründe)
+RewriteEngine On
+
+# API yönlendirmesi
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+
+# Directory listing kapat
+Options -Indexes

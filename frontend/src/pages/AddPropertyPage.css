@@ -9,7 +9,7 @@
   text-align: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
   border-radius: 12px;
   color: white;
 }
@@ -49,7 +49,7 @@
   font-size: 1.3rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid #3498db;
+  border-bottom: 2px solid #d4af37;
   display: inline-block;
 }
 
@@ -80,7 +80,7 @@
   border: 2px solid #ecf0f1;
   border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
 }
 
@@ -88,8 +88,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
 .form-group textarea {
@@ -119,13 +119,13 @@
   border: 2px solid #ecf0f1;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
 }
 
 .checkbox-item:hover {
   background: #e3f2fd;
-  border-color: #3498db;
+  border-color: #d4af37;
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -155,7 +155,7 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -164,14 +164,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #d4af37, #b8941f);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  background: linear-gradient(135deg, #b8941f, #9a7b1a);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
 }
 
 .btn-secondary {
@@ -221,7 +221,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #ecf0f1;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #d4af37;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;

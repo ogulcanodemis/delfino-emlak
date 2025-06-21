@@ -156,7 +156,7 @@ const AddPropertyPage = ({ user }) => {
       <div className="page-container">
         <div className="auth-required">
           <div className="auth-required-content">
-            <h2>🔒 Giriş Gerekli</h2>
+            <h2>◆ Giriş Gerekli</h2>
             <p>İlan eklemek için giriş yapmalısınız.</p>
             <div className="auth-actions">
               <button 
@@ -190,7 +190,7 @@ const AddPropertyPage = ({ user }) => {
           <button onClick={() => navigate('/my-properties')} className="btn btn-secondary">
             ← Geri Dön
           </button>
-          <h1>➕ Yeni İlan Ekle</h1>
+          <h1>◆ Yeni İlan Ekle</h1>
           <p>İlan bilgilerinizi girin ve yayınlayın</p>
         </div>
 
@@ -208,7 +208,7 @@ const AddPropertyPage = ({ user }) => {
 
         <form onSubmit={handleSubmit} className="add-property-form">
           <div className="form-section">
-            <h3>📝 Temel Bilgiler</h3>
+            <h3>◆ Temel Bilgiler</h3>
             
             <div className="form-row">
               <div className="form-group">
@@ -289,7 +289,7 @@ const AddPropertyPage = ({ user }) => {
           </div>
 
           <div className="form-section">
-            <h3>📍 Konum Bilgileri</h3>
+            <h3>◆ Konum Bilgileri</h3>
             
             <div className="form-row">
               <div className="form-group">
@@ -343,7 +343,7 @@ const AddPropertyPage = ({ user }) => {
           </div>
 
           <div className="form-section">
-            <h3>🏠 Detay Bilgileri</h3>
+            <h3>◆ Detay Bilgileri</h3>
             
             <div className="form-row">
               <div className="form-group">
@@ -452,7 +452,7 @@ const AddPropertyPage = ({ user }) => {
           </div>
 
           <div className="form-section">
-            <h3>✨ Özellikler</h3>
+            <h3>◆ Özellikler</h3>
             
             <div className="checkbox-grid">
               <label className="checkbox-item">
@@ -462,7 +462,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.balcony === 1}
                   onChange={handleChange}
                 />
-                <span>🌿 Balkon</span>
+                <span>◇ Balkon</span>
               </label>
 
               <label className="checkbox-item">
@@ -472,7 +472,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.elevator === 1}
                   onChange={handleChange}
                 />
-                <span>🛗 Asansör</span>
+                <span>◇ Asansör</span>
               </label>
 
               <label className="checkbox-item">
@@ -482,7 +482,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.parking === 1}
                   onChange={handleChange}
                 />
-                <span>🚗 Otopark</span>
+                <span>◇ Otopark</span>
               </label>
 
               <label className="checkbox-item">
@@ -492,7 +492,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.garden === 1}
                   onChange={handleChange}
                 />
-                <span>🌳 Bahçe</span>
+                <span>◇ Bahçe</span>
               </label>
 
               <label className="checkbox-item">
@@ -502,7 +502,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.swimming_pool === 1}
                   onChange={handleChange}
                 />
-                <span>🏊 Havuz</span>
+                <span>◇ Havuz</span>
               </label>
 
               <label className="checkbox-item">
@@ -512,7 +512,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.security === 1}
                   onChange={handleChange}
                 />
-                <span>🔒 Güvenlik</span>
+                <span>◇ Güvenlik</span>
               </label>
 
               <label className="checkbox-item">
@@ -522,7 +522,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.air_conditioning === 1}
                   onChange={handleChange}
                 />
-                <span>❄️ Klima</span>
+                <span>◇ Klima</span>
               </label>
 
               <label className="checkbox-item">
@@ -532,7 +532,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.internet === 1}
                   onChange={handleChange}
                 />
-                <span>🌐 İnternet</span>
+                <span>◇ İnternet</span>
               </label>
 
               <label className="checkbox-item">
@@ -542,7 +542,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.credit_suitable === 1}
                   onChange={handleChange}
                 />
-                <span>💳 Krediye Uygun</span>
+                <span>◇ Krediye Uygun</span>
               </label>
 
               <label className="checkbox-item">
@@ -552,7 +552,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.exchange_suitable === 1}
                   onChange={handleChange}
                 />
-                <span>🔄 Takasa Uygun</span>
+                <span>◇ Takasa Uygun</span>
               </label>
             </div>
           </div>
@@ -566,7 +566,7 @@ const AddPropertyPage = ({ user }) => {
           </div>
 
           <div className="form-section">
-            <h3>⚙️ İlan Durumu</h3>
+            <h3>◆ İlan Durumu</h3>
             
             <div className="form-group">
               <label className="checkbox-item">
@@ -576,7 +576,7 @@ const AddPropertyPage = ({ user }) => {
                   checked={property.is_active === 1}
                   onChange={handleChange}
                 />
-                <span>✅ İlan Aktif</span>
+                <span>◆ İlan Aktif</span>
               </label>
               <small>İlanın sitede görünür olmasını istiyorsanız işaretleyin</small>
             </div>
@@ -596,7 +596,7 @@ const AddPropertyPage = ({ user }) => {
               className="btn btn-primary"
               disabled={saving}
             >
-              {saving ? 'Ekleniyor...' : '➕ İlan Ekle'}
+              {saving ? 'Ekleniyor...' : '◆ İlan Ekle'}
             </button>
           </div>
         </form>

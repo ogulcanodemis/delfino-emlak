@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword, deleteAccount } from '../services/apiService';
+import './AccountSettingsPage.css';
 
 const AccountSettingsPage = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
       <div className="page-container">
         <div className="auth-required">
           <div className="auth-required-content">
-            <h2>🔒 Giriş Gerekli</h2>
+            <h2>◆ Giriş Gerekli</h2>
             <p>Hesap ayarlarınızı görüntülemek için giriş yapmalısınız.</p>
             <div className="auth-actions">
               <button 
@@ -106,7 +107,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
     <div className="page-container">
       <div className="account-settings-page">
         <div className="page-header">
-          <h1>⚙️ Hesap Ayarları</h1>
+          <h1>◆ Hesap Ayarları</h1>
           <p>Güvenlik ve hesap ayarlarınızı yönetin</p>
         </div>
 
@@ -114,7 +115,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
           {/* Şifre Değiştirme */}
           <div className="settings-section">
             <div className="section-header">
-              <h3>🔐 Şifre Değiştir</h3>
+              <h3>◆ Şifre Değiştir</h3>
               <p>Hesabınızın güvenliği için düzenli olarak şifrenizi değiştirin</p>
             </div>
 
@@ -178,7 +179,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
                   disabled={loading}
                   className="btn btn-primary"
                 >
-                  {loading ? 'Değiştiriliyor...' : '🔐 Şifreyi Değiştir'}
+                  {loading ? 'Değiştiriliyor...' : '◆ Şifreyi Değiştir'}
                 </button>
               </div>
             </form>
@@ -187,7 +188,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
           {/* Hesap Bilgileri */}
           <div className="settings-section">
             <div className="section-header">
-              <h3>👤 Hesap Bilgileri</h3>
+              <h3>◆ Hesap Bilgileri</h3>
               <p>Hesabınızla ilgili temel bilgiler</p>
             </div>
 
@@ -225,7 +226,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
                 onClick={() => navigate('/profile')}
                 className="btn btn-outline"
               >
-                ✏️ Profili Düzenle
+                ◆ Profili Düzenle
               </button>
             </div>
           </div>
@@ -233,7 +234,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
           {/* Tehlikeli İşlemler */}
           <div className="settings-section danger-section">
             <div className="section-header">
-              <h3>⚠️ Tehlikeli İşlemler</h3>
+              <h3>◆ Tehlikeli İşlemler</h3>
               <p>Bu işlemler geri alınamaz. Dikkatli olun!</p>
             </div>
 
@@ -247,7 +248,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
                   onClick={() => setShowDeleteConfirm(true)}
                   className="btn btn-danger"
                 >
-                  🗑️ Hesabı Sil
+                  ◆ Hesabı Sil
                 </button>
               </div>
             </div>
@@ -259,7 +260,7 @@ const AccountSettingsPage = ({ user, onLogout }) => {
           <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>⚠️ Hesap Silme Onayı</h3>
+                <h3>◆ Hesap Silme Onayı</h3>
                 <button 
                   className="close-btn" 
                   onClick={() => setShowDeleteConfirm(false)}

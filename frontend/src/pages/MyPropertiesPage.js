@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProperties, deleteProperty } from '../services/apiService';
 import PropertyCard from '../components/PropertyCard';
+import './MyPropertiesPage.css';
 
 const MyPropertiesPage = ({ user }) => {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ const MyPropertiesPage = ({ user }) => {
       <div className="page-container">
         <div className="auth-required">
           <div className="auth-required-content">
-            <h2>🔒 Giriş Gerekli</h2>
+            <h2>◆ Giriş Gerekli</h2>
             <p>İlanlarınızı görüntülemek için giriş yapmalısınız.</p>
             <div className="auth-actions">
               <button 
@@ -120,7 +121,7 @@ const MyPropertiesPage = ({ user }) => {
       <div className="my-properties-page">
         <div className="page-header">
           <div className="header-content">
-            <h1>🏠 İlanlarım</h1>
+            <h1>◇ İlanlarım</h1>
             <p>Yayınladığınız ilanları yönetin</p>
           </div>
           <div className="header-actions">
@@ -128,7 +129,7 @@ const MyPropertiesPage = ({ user }) => {
               onClick={() => navigate('/add-property')}
               className="btn btn-primary"
             >
-              ➕ Yeni İlan Ekle
+              ◆ Yeni İlan Ekle
             </button>
           </div>
         </div>
@@ -167,14 +168,14 @@ const MyPropertiesPage = ({ user }) => {
             {properties.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-content">
-                  <span className="empty-icon">🏠</span>
+                  <span className="empty-icon">◇</span>
                   <h3>Henüz ilanınız yok</h3>
                   <p>İlk ilanınızı oluşturun ve potansiyel alıcılarla buluşun.</p>
                   <button 
                     onClick={() => navigate('/add-property')} 
                     className="btn btn-primary"
                   >
-                    ➕ İlk İlanımı Oluştur
+                    ◆ İlk İlanımı Oluştur
                   </button>
                 </div>
               </div>
@@ -192,12 +193,12 @@ const MyPropertiesPage = ({ user }) => {
                       
                       <div className="property-status">
                         {property.is_active ? (
-                          <span className="status-badge active">✅ Aktif</span>
+                          <span className="status-badge active">◆ Aktif</span>
                         ) : (
-                          <span className="status-badge inactive">❌ Pasif</span>
+                          <span className="status-badge inactive">◇ Pasif</span>
                         )}
                         {property.is_featured && (
-                          <span className="status-badge featured">⭐ Öne Çıkan</span>
+                          <span className="status-badge featured">◆ Öne Çıkan</span>
                         )}
                       </div>
                     </div>
@@ -207,19 +208,19 @@ const MyPropertiesPage = ({ user }) => {
                         onClick={() => navigate(`/property/${property.id}`)}
                         className="btn btn-outline"
                       >
-                        👁️ Görüntüle
+                        ◇ Görüntüle
                       </button>
                       <button 
                         onClick={() => handleEditProperty(property.id)}
                         className="btn btn-secondary"
                       >
-                        ✏️ Düzenle
+                        ◆ Düzenle
                       </button>
                       <button 
                         onClick={() => handleDeleteProperty(property.id)}
                         className="btn btn-danger"
                       >
-                        🗑️ Sil
+                        ◇ Sil
                       </button>
                     </div>
                   </div>

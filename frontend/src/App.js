@@ -18,7 +18,6 @@ import AdminPanelPage from './pages/AdminPanelPage';
 import AdminPropertyDetailPage from './pages/AdminPropertyDetailPage';
 
 // Bileşenler
-import NotificationBell from './components/NotificationBell';
 
 // Servisler
 import { getCurrentUser, logout, isAuthenticated, canAccessAdminPanel } from './services/apiService';
@@ -26,7 +25,7 @@ import { getCurrentUser, logout, isAuthenticated, canAccessAdminPanel } from './
 // Header Component
 function Header({ user, onLogout }) {
   const location = useLocation();
-  const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -34,63 +33,125 @@ function Header({ user, onLogout }) {
     return false;
   };
 
+  const toggleMobileMenu = () => {
+    const newState = !isMobileMenuOpen;
+    setIsMobileMenuOpen(newState);
+    
+    // Prevent body scroll when menu is open
+    if (newState) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    document.body.classList.remove('mobile-menu-open');
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, []);
+
   return (
     <header className="header">
       <div className="container">
         <div className="header-content">
-          <Link to="/" className="logo">
-            🏠 Emlak Delfino
+          <Link to="/" className="logo" onClick={closeMobileMenu}>
+            ◆ BK Yatırım
           </Link>
           
-          <nav className="nav">
-            <Link 
-              to="/" 
-              className={isActive('/') ? 'active' : ''}
-            >
-              Ana Sayfa
-            </Link>
-            <Link 
-              to="/properties" 
-              className={isActive('/properties') ? 'active' : ''}
-            >
-              İlanlar
-            </Link>
-            {user && (
+          {/* Hamburger Menu Button */}
+          <button 
+            className={`mobile-menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+            onClick={toggleMobileMenu}
+            aria-label="Menüyü aç/kapat"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          
+          <nav className={`nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+            <div className="nav-links">
               <Link 
-                to="/favorites" 
-                className={isActive('/favorites') ? 'active' : ''}
+                to="/" 
+                className={isActive('/') ? 'active' : ''}
+                onClick={closeMobileMenu}
               >
-                ❤️ Favorilerim
+                Ana Sayfa
               </Link>
-            )}
-            {user && canAccessAdminPanel(user) && (
               <Link 
-                to="/admin" 
-                className={isActive('/admin') ? 'active' : ''}
+                to="/properties" 
+                className={isActive('/properties') ? 'active' : ''}
+                onClick={closeMobileMenu}
               >
-                🛠️ Admin Paneli
+                İlanlar
               </Link>
-            )}
+              {user && (
+                <Link 
+                  to="/favorites" 
+                  className={isActive('/favorites') ? 'active' : ''}
+                  onClick={closeMobileMenu}
+                >
+                  ♡ Favorilerim
+                </Link>
+              )}
+              {user && canAccessAdminPanel(user) && (
+                <Link 
+                  to="/admin" 
+                  className={isActive('/admin') ? 'active' : ''}
+                  onClick={closeMobileMenu}
+                >
+                  ⚙ Admin Paneli
+                </Link>
+              )}
+            </div>
+            
+            <div className="auth-section">
+              {user ? (
+                <div className="user-menu">
+                  <Link to="/profile" className="btn btn-outline" onClick={closeMobileMenu}>
+                    ◉ Profil
+                  </Link>
+                  <button onClick={() => { onLogout(); closeMobileMenu(); }} className="btn btn-secondary">
+                    Çıkış Yap
+                  </button>
+                </div>
+              ) : (
+                <div className="auth-buttons">
+                  <Link to="/login" className="btn btn-secondary" onClick={closeMobileMenu}>
+                    Giriş Yap
+                  </Link>
+                  <Link to="/register" className="btn btn-primary" onClick={closeMobileMenu}>
+                    Kayıt Ol
+                  </Link>
+                </div>
+              )}
+            </div>
           </nav>
           
-          <div className="auth-section">
+          <div className="auth-section desktop-auth">
+            {/* Desktop auth section */}
             {user ? (
               <div className="user-menu">
-                <NotificationBell user={user} />
-                <span className="user-name">Merhaba, {user.name}</span>
-                <Link to="/profile" className="btn btn-outline">
-                  👤 Profil
+                <Link to="/profile" className="btn btn-outline" onClick={closeMobileMenu}>
+                  ◉ Profil
                 </Link>
-                <button onClick={onLogout} className="btn btn-secondary">
+                <button onClick={() => { onLogout(); closeMobileMenu(); }} className="btn btn-secondary">
                   Çıkış Yap
                 </button>
               </div>
             ) : (
               <div className="auth-buttons">
-                <Link to="/login" className="btn btn-secondary">
+                <Link to="/login" className="btn btn-secondary" onClick={closeMobileMenu}>
                   Giriş Yap
                 </Link>
-                <Link to="/register" className="btn btn-primary">
+                <Link to="/register" className="btn btn-primary" onClick={closeMobileMenu}>
                   Kayıt Ol
                 </Link>
               </div>
@@ -98,6 +159,14 @@ function Header({ user, onLogout }) {
           </div>
         </div>
       </div>
+      
+      {/* Mobile menu overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-menu-overlay"
+          onClick={closeMobileMenu}
+        ></div>
+      )}
     </header>
   );
 }
@@ -180,7 +249,7 @@ function AppContent() {
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <h3>🏠 Emlak Delfino</h3>
+              <h3>◆ BK Yatırım</h3>
               <p>Hayalinizdeki evi bulmanın en kolay yolu</p>
             </div>
             
@@ -195,13 +264,13 @@ function AppContent() {
             
             <div className="footer-section">
               <h4>İletişim</h4>
-              <p>📧 info@emlakdelfino.com</p>
-              <p>📞 0212 123 45 67</p>
+              <p>✉ info@bkyatirim.com</p>
+              <p>☏ 0212 123 45 67</p>
             </div>
           </div>
           
           <div className="footer-bottom">
-            <p>&copy; 2024 Emlak Delfino. Tüm hakları saklıdır.</p>
+            <p>&copy; 2024 BK Yatırım. Tüm hakları saklıdır.</p>
           </div>
         </div>
       </footer>

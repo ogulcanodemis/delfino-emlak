@@ -95,7 +95,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
       <div className="page-container">
         <div className="auth-required">
           <div className="auth-required-content">
-            <h2>🔒 Giriş Gerekli</h2>
+            <h2>◆ Giriş Gerekli</h2>
             <p>Profilinizi görüntülemek için giriş yapmalısınız.</p>
             <div className="auth-actions">
               <button 
@@ -132,7 +132,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
     <div className="page-container">
       <div className="profile-page">
         <div className="page-header">
-          <h1>👤 Profilim</h1>
+          <h1>◆ Profilim</h1>
           <p>Hesap bilgilerinizi görüntüleyin ve düzenleyin</p>
         </div>
 
@@ -162,7 +162,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
             </div>
 
             <div className="profile-stats">
-              <h4>📊 İstatistikler</h4>
+              <h4>◆ İstatistikler</h4>
               <div className="stat-item">
                 <span>İlanlar:</span>
                 <span>-</span>
@@ -182,7 +182,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
                 onClick={() => navigate('/my-properties')}
                 className="btn btn-outline"
               >
-                🏠 İlanlarım
+                ◇ İlanlarım
               </button>
               
               {/* Admin Panel Butonu - Sadece süper adminler için */}
@@ -191,7 +191,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
                   onClick={() => navigate('/admin')}
                   className="btn btn-admin"
                 >
-                  🛠️ Admin Paneli
+                  ◆ Admin Paneli
                 </button>
               )}
               
@@ -199,7 +199,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
                 onClick={() => navigate('/account-settings')}
                 className="btn btn-outline"
               >
-                ⚙️ Hesap Ayarları
+                ◇ Hesap Ayarları
               </button>
             </div>
           </div>
@@ -207,13 +207,13 @@ const ProfilePage = ({ user, onUserUpdate }) => {
           <div className="profile-main">
             <div className="profile-form-section">
               <div className="section-header">
-                <h3>📝 Profil Bilgileri</h3>
+                <h3>◆ Profil Bilgileri</h3>
                 {!isEditing ? (
                   <button 
                     onClick={() => setIsEditing(true)}
                     className="btn btn-primary"
                   >
-                    ✏️ Düzenle
+                    ◆ Düzenle
                   </button>
                 ) : (
                   <div className="edit-actions">
@@ -332,7 +332,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
                       disabled={loading}
                       className="btn btn-primary"
                     >
-                      {loading ? 'Kaydediliyor...' : '💾 Kaydet'}
+                      {loading ? 'Kaydediliyor...' : '◆ Kaydet'}
                     </button>
                   </div>
                 )}

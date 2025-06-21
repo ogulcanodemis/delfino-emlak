@@ -54,28 +54,10 @@ const LoginPage = ({ onLogin }) => {
     }
   };
 
-  // Test kullanıcıları için hızlı giriş
-  const quickLogin = async (email, password) => {
-    setFormData({ email, password });
-    try {
-      setLoading(true);
-      setError('');
-      
-      const user = await login(email, password);
-      onLogin(user);
-      navigate('/');
-      
-    } catch (error) {
-      console.error('Hızlı giriş hatası:', error);
-      setError(error.message || 'Giriş yapılırken bir hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
@@ -104,12 +86,12 @@ const LoginPage = ({ onLogin }) => {
             marginBottom: '1rem',
             textShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
           }}>
-            🔐
+            ◆
           </div>
           <h1 style={{
             fontSize: '2.5rem',
             fontWeight: '700',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -122,7 +104,7 @@ const LoginPage = ({ onLogin }) => {
             fontSize: '1.1rem',
             fontWeight: '500'
           }}>
-            Emlak Delfino hesabınıza giriş yapın
+            BK Yatırım hesabınıza giriş yapın
           </p>
         </div>
         
@@ -153,7 +135,7 @@ const LoginPage = ({ onLogin }) => {
               fontWeight: '600',
               fontSize: '1rem'
             }}>
-              📧 E-posta
+              ◇ E-posta
             </label>
             <input
               type="email"
@@ -169,13 +151,13 @@ const LoginPage = ({ onLogin }) => {
                 border: '2px solid #e5e7eb',
                 borderRadius: '12px',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 background: 'white',
                 boxSizing: 'border-box'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                e.target.style.borderColor = '#d4af37';
+                e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                 e.target.style.transform = 'translateY(-2px)';
               }}
               onBlur={(e) => {
@@ -194,7 +176,7 @@ const LoginPage = ({ onLogin }) => {
               fontWeight: '600',
               fontSize: '1rem'
             }}>
-              🔒 Şifre
+              ◌ Şifre
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -212,13 +194,13 @@ const LoginPage = ({ onLogin }) => {
                   border: '2px solid #e5e7eb',
                   borderRadius: '12px',
                   fontSize: '1rem',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   background: 'white',
                   boxSizing: 'border-box'
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = '#667eea';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                  e.target.style.borderColor = '#d4af37';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1)';
                   e.target.style.transform = 'translateY(-2px)';
                 }}
                 onBlur={(e) => {
@@ -242,10 +224,10 @@ const LoginPage = ({ onLogin }) => {
                   color: '#6b7280',
                   transition: 'color 0.3s ease'
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#667eea'}
+                onMouseEnter={(e) => e.target.style.color = '#d4af37'}
                 onMouseLeave={(e) => e.target.style.color = '#6b7280'}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? '◌' : '◌'}
               </button>
             </div>
           </div>
@@ -256,14 +238,14 @@ const LoginPage = ({ onLogin }) => {
             style={{
               width: '100%',
               padding: '1rem',
-              background: loading ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: loading ? '#9ca3af' : 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
               fontSize: '1.1rem',
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -272,7 +254,7 @@ const LoginPage = ({ onLogin }) => {
             onMouseEnter={(e) => {
               if (!loading) {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 25px rgba(102, 126, 234, 0.4)';
+                e.target.style.boxShadow = '0 10px 25px rgba(212, 175, 55, 0.4)';
               }
             }}
             onMouseLeave={(e) => {
@@ -292,135 +274,10 @@ const LoginPage = ({ onLogin }) => {
                 animation: 'spin 1s linear infinite'
               }}></div>
             )}
-            {loading ? 'Giriş yapılıyor...' : '🚀 Giriş Yap'}
+            {loading ? 'Giriş yapılıyor...' : '→ Giriş Yap'}
           </button>
         </form>
 
-        {/* Test Kullanıcıları */}
-        <div style={{
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-          padding: '1.5rem',
-          borderRadius: '16px',
-          marginBottom: '2rem',
-          border: '1px solid rgba(102, 126, 234, 0.1)'
-        }}>
-          <h4 style={{
-            marginBottom: '1rem', 
-            textAlign: 'center',
-            color: '#374151',
-            fontWeight: '600',
-            fontSize: '1.2rem'
-          }}>
-            🧪 Test Kullanıcıları
-          </h4>
-          <p style={{
-            fontSize: '0.9rem', 
-            color: '#6b7280', 
-            marginBottom: '1rem', 
-            textAlign: 'center',
-            fontWeight: '500'
-          }}>
-            Hızlı test için aşağıdaki kullanıcılardan birini seçin:
-          </p>
-          
-          <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
-            <button
-              type="button"
-              onClick={() => quickLogin('admin@emlakdelfino.com', 'admin123')}
-              disabled={loading}
-              style={{
-                padding: '0.75rem 1rem',
-                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
-              }}
-            >
-              👑 Admin Girişi
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => quickLogin('emlakci@emlakdelfino.com', 'emlakci123')}
-              disabled={loading}
-              style={{
-                padding: '0.75rem 1rem',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
-              }}
-            >
-              🏢 Emlakçı Girişi
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => quickLogin('kullanici@emlakdelfino.com', 'kullanici123')}
-              disabled={loading}
-              style={{
-                padding: '0.75rem 1rem',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
-              }}
-            >
-              👤 Kullanıcı Girişi
-            </button>
-          </div>
-        </div>
 
         {/* Kayıt Ol ve Ana Sayfa Linkleri */}
         <div style={{
@@ -442,20 +299,20 @@ const LoginPage = ({ onLogin }) => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#667eea',
+                color: '#d4af37',
                 textDecoration: 'none',
                 cursor: 'pointer',
                 fontWeight: '600',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
               onMouseEnter={(e) => {
                 e.target.style.textDecoration = 'underline';
-                e.target.style.color = '#764ba2';
+                e.target.style.color = '#b8941f';
               }}
               onMouseLeave={(e) => {
                 e.target.style.textDecoration = 'none';
-                e.target.style.color = '#667eea';
+                e.target.style.color = '#d4af37';
               }}
             >
               Kayıt Ol
@@ -467,47 +324,33 @@ const LoginPage = ({ onLogin }) => {
             onClick={() => navigate('/')}
             style={{
               background: 'rgba(255, 255, 255, 0.8)',
-              color: '#667eea',
-              border: '2px solid #667eea',
+              color: '#d4af37',
+              border: '2px solid #d4af37',
               padding: '0.75rem 1.5rem',
               borderRadius: '12px',
               fontSize: '1rem',
               fontWeight: '600',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               backdropFilter: 'blur(10px)'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = '#667eea';
-              e.target.style.color = 'white';
+              e.target.style.background = '#d4af37';
+              e.target.style.color = '#1a1a1a';
               e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+              e.target.style.boxShadow = '0 4px 12px rgba(212, 175, 55, 0.3)';
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.8)';
-              e.target.style.color = '#667eea';
+              e.target.style.color = '#d4af37';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            🏠 Ana Sayfaya Dön
+            ◆ Ana Sayfaya Dön
           </button>
         </div>
 
-        {/* API Durumu */}
-        <div style={{
-          marginTop: '2rem',
-          padding: '0.75rem',
-          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-          borderRadius: '12px',
-          fontSize: '0.85rem',
-          color: '#0369a1',
-          textAlign: 'center',
-          border: '1px solid rgba(3, 105, 161, 0.2)',
-          fontWeight: '500'
-        }}>
-          🔗 API Bağlantısı: http://localhost/emlak-delfino/backend/api
-        </div>
       </div>
 
       {/* CSS Animations */}

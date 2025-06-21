@@ -1,0 +1,49 @@
+# ==============================================
+# HOSTİNGER UYUMLU .HTACCESS DOSYASI
+# ==============================================
+
+# Ana .htaccess (public_html kök dizinde)
+# Bu dosyayı public_html/.htaccess olarak kaydedin
+
+RewriteEngine On
+
+# HTTPS yönlendirmesi (isteğe bağlı)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Backend API routing
+RewriteRule ^backend/api/(.*)$ backend/api/index.php [L,QSA]
+
+# React Router (SPA) - API dışında tüm istekleri index.html'e yönlendir
+RewriteCond %{REQUEST_URI} !^/backend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Temel güvenlik
+Options -Indexes
+
+# CORS (basit versiyon)
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+---
+
+# Backend .htaccess (backend/.htaccess)
+# Bu dosyayı backend/.htaccess olarak kaydedin
+
+RewriteEngine On
+
+# API routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+
+Options -Indexes
+
+---
+
+# Uploads .htaccess (uploads/.htaccess) - MEVCUT, DEĞİŞTİRME

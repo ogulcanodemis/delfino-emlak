@@ -28,8 +28,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $request_uri = $_SERVER['REQUEST_URI'];
 $path = parse_url($request_uri, PHP_URL_PATH);
 
-// API prefix'ini kaldır
-$path = str_replace('/emlak-delfino/backend/api', '', $path);
+// API prefix'ini kaldır (production ortamı için)
+$path = str_replace('/backend/api', '', $path);
 $path = trim($path, '/');
 
 // Path'i parçalara ayır
@@ -281,6 +281,20 @@ function handleAuthEndpoint($db, $method, $segments) {
                 Response::error('Bu endpoint sadece POST metodunu destekler', 405);
             }
             $authController->forgotPassword();
+            break;
+            
+        case 'change-password':
+            if ($method !== 'PUT') {
+                Response::error('Bu endpoint sadece PUT metodunu destekler', 405);
+            }
+            $authController->changePassword();
+            break;
+            
+        case 'delete-account':
+            if ($method !== 'DELETE') {
+                Response::error('Bu endpoint sadece DELETE metodunu destekler', 405);
+            }
+            $authController->deleteAccount();
             break;
             
         default:

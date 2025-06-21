@@ -313,5 +313,92 @@ class User {
 
         return $row['total'];
     }
+
+    /**
+     * Kullanıcı ID'si ile şifre güncelleme
+     */
+    public function updatePasswordById($user_id, $new_password) {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET password=:password, updated_at=NOW()
+                  WHERE id=:user_id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+
+        $stmt->bindParam(":password", $hashed_password);
+        $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Kullanıcı ID'si ile şifre doğrulama
+     */
+    public function verifyPasswordById($user_id, $password) {
+        $query = "SELECT password FROM " . $this->table_name . " WHERE id = :user_id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row) {
+            return password_verify($password, $row['password']);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Hesap silme işlemi
+     */
+    public function deleteAccount($user_id) {
+        try {
+            // Transaction başlat
+            $this->conn->beginTransaction();
+
+            // Kullanıcının ilanlarını sil
+            $query1 = "DELETE FROM properties WHERE user_id = :user_id";
+            $stmt1 = $this->conn->prepare($query1);
+            $stmt1->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt1->execute();
+
+            // Kullanıcının favorilerini sil
+            $query2 = "DELETE FROM favorites WHERE user_id = :user_id";
+            $stmt2 = $this->conn->prepare($query2);
+            $stmt2->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt2->execute();
+
+            // Kullanıcının mesajlarını sil (eğer messages tablosu varsa)
+            $query3 = "DELETE FROM messages WHERE sender_id = :user_id OR receiver_id = :user_id";
+            $stmt3 = $this->conn->prepare($query3);
+            $stmt3->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt3->execute();
+
+            // Role isteklerini sil (eğer role_requests tablosu varsa)
+            $query4 = "DELETE FROM role_requests WHERE user_id = :user_id";
+            $stmt4 = $this->conn->prepare($query4);
+            $stmt4->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt4->execute();
+
+            // Son olarak kullanıcı hesabını sil
+            $query5 = "DELETE FROM " . $this->table_name . " WHERE id = :user_id";
+            $stmt5 = $this->conn->prepare($query5);
+            $stmt5->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $result = $stmt5->execute();
+
+            // Transaction'ı commit et
+            $this->conn->commit();
+            
+            return $result;
+
+        } catch (Exception $e) {
+            // Hata durumunda rollback yap
+            $this->conn->rollback();
+            throw $e;
+        }
+    }
 }
 ?> 

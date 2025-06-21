@@ -8,6 +8,8 @@ import {
   toggleApprovalSetting,
   canAccessAdminPanel 
 } from '../services/apiService';
+import AdminPropertyCard from '../components/AdminPropertyCard';
+import '../components/AdminPropertyCard.css';
 import './AdminPanelPage.css';
 
 const AdminPanelPage = ({ user }) => {
@@ -152,7 +154,7 @@ const AdminPanelPage = ({ user }) => {
     return (
       <div className="admin-panel-page">
         <div className="access-denied">
-          <h2>🚫 Erişim Reddedildi</h2>
+          <h2>◆ Erişim Reddedildi</h2>
           <p>Bu sayfaya erişim için admin yetkisine sahip olmanız gerekiyor.</p>
         </div>
       </div>
@@ -170,7 +172,7 @@ const AdminPanelPage = ({ user }) => {
             ← Profile'e Dön
           </button>
           <div className="admin-title">
-            <h1>🛠️ Admin Paneli</h1>
+            <h1>◆ Admin Paneli</h1>
             <p>İlan onay sistemi yönetimi</p>
           </div>
         </div>
@@ -179,7 +181,7 @@ const AdminPanelPage = ({ user }) => {
       {/* İstatistik Kartları */}
       <div className="stats-grid">
         <div className="stat-card pending">
-          <div className="stat-icon">⏳</div>
+          <div className="stat-icon">◇</div>
           <div className="stat-content">
             <h3>{stats.pending_count || 0}</h3>
             <p>Bekleyen İlan</p>
@@ -187,7 +189,7 @@ const AdminPanelPage = ({ user }) => {
         </div>
         
         <div className="stat-card approved">
-          <div className="stat-icon">✅</div>
+          <div className="stat-icon">◆</div>
           <div className="stat-content">
             <h3>{stats.approved_today || 0}</h3>
             <p>Bugün Onaylanan</p>
@@ -195,7 +197,7 @@ const AdminPanelPage = ({ user }) => {
         </div>
         
         <div className="stat-card rejected">
-          <div className="stat-icon">❌</div>
+          <div className="stat-icon">◇</div>
           <div className="stat-content">
             <h3>{stats.rejected_today || 0}</h3>
             <p>Bugün Reddedilen</p>
@@ -203,7 +205,7 @@ const AdminPanelPage = ({ user }) => {
         </div>
         
         <div className="stat-card total">
-          <div className="stat-icon">📊</div>
+          <div className="stat-icon">◆</div>
           <div className="stat-content">
             <h3>{stats.total_approved || 0}</h3>
             <p>Toplam Onaylı</p>
@@ -217,13 +219,13 @@ const AdminPanelPage = ({ user }) => {
           className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          ⏳ Bekleyen İlanlar ({stats.pending_count || 0})
+          ◇ Bekleyen İlanlar ({stats.pending_count || 0})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          ⚙️ Ayarlar
+          ◆ Ayarlar
         </button>
       </div>
 
@@ -238,7 +240,7 @@ const AdminPanelPage = ({ user }) => {
                 onClick={() => loadPendingProperties(currentPage)}
                 disabled={loading}
               >
-                🔄 Yenile
+                ◆ Yenile
               </button>
             </div>
 
@@ -249,7 +251,7 @@ const AdminPanelPage = ({ user }) => {
               </div>
             ) : pendingProperties.length === 0 ? (
               <div className="empty-state">
-                <span>📭</span>
+                <span>◇</span>
                 <h3>Bekleyen İlan Yok</h3>
                 <p>Şu anda onay bekleyen ilan bulunmuyor.</p>
               </div>
@@ -257,66 +259,16 @@ const AdminPanelPage = ({ user }) => {
               <>
                 <div className="properties-list">
                   {pendingProperties.map(property => (
-                    <div key={property.id} className="property-card">
-                      <div className="property-image">
-                        {property.main_image ? (
-                          <img 
-                            src={`/backend/uploads/properties/${property.main_image}`} 
-                            alt={property.title}
-                            onError={(e) => {
-                              e.target.src = '/placeholder-property.jpg';
-                            }}
-                          />
-                        ) : (
-                          <div className="no-image">📷</div>
-                        )}
-                      </div>
-                      
-                      <div className="property-content">
-                        <div className="property-header">
-                          <h3>{property.title}</h3>
-                          <span className="property-price">
-                            {formatPrice(property.price)}
-                          </span>
-                        </div>
-                        
-                        <div className="property-details">
-                          <p><strong>📍 Konum:</strong> {property.city_name}, {property.district_name}</p>
-                          <p><strong>🏠 Tip:</strong> {property.property_type_name}</p>
-                          <p><strong>📐 Alan:</strong> {property.area} m²</p>
-                          <p><strong>👤 İlan Sahibi:</strong> {property.user_name} ({property.user_email})</p>
-                          <p><strong>📅 Oluşturulma:</strong> {formatDate(property.created_at)}</p>
-                        </div>
-                        
-                        <div className="property-description">
-                          <p>{property.description?.substring(0, 150)}...</p>
-                        </div>
-                        
-                        <div className="property-actions">
-                          <button 
-                            className="approve-btn"
-                            onClick={() => handleApprove(property.id)}
-                          >
-                            ✅ Onayla
-                          </button>
-                          <button 
-                            className="reject-btn"
-                            onClick={() => {
-                              setSelectedProperty(property);
-                              setShowRejectModal(true);
-                            }}
-                          >
-                            ❌ Reddet
-                          </button>
-                          <button 
-                            className="view-btn"
-                            onClick={() => handleViewProperty(property.id)}
-                          >
-                            👁️ Görüntüle
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <AdminPropertyCard
+                      key={property.id}
+                      property={property}
+                      onApprove={() => handleApprove(property.id)}
+                      onReject={() => {
+                        setSelectedProperty(property);
+                        setShowRejectModal(true);
+                      }}
+                      onView={() => handleViewProperty(property.id)}
+                    />
                   ))}
                 </div>
 
@@ -365,7 +317,7 @@ const AdminPanelPage = ({ user }) => {
             </div>
 
             <div className="info-card">
-              <h3>ℹ️ Bilgi</h3>
+              <h3>◆ Bilgi</h3>
               <ul>
                 <li>Onay sistemi aktifken, yeni ilanlar "beklemede" durumunda oluşturulur</li>
                 <li>Admin onayından sonra ilanlar yayınlanır</li>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mobil Menü Test</title>
+    <style>
+        /* Test için temel CSS */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        
+        /* Header ve Mobil Test Kuralları */
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-bottom: 2px solid #d4af37;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #d4af37;
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.7rem;
+            z-index: 1002;
+        }
+        
+        .mobile-menu-toggle span {
+            width: 28px;
+            height: 3px;
+            background: #d4af37;
+            margin: 4px 0;
+            transition: 0.3s;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+        }
+        
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: #d4af37;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #2d2d2d;
+            color: #d4af37;
+            border: 2px solid #d4af37;
+        }
+        
+        /* Mobil Kuralları */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .nav {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 85%;
+                max-width: 350px;
+                height: calc(100vh - 120px);
+                background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(45, 45, 45, 0.98) 100%);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                gap: 0;
+                transition: left 0.4s ease;
+                z-index: 1001;
+                padding: 6rem 0 2rem 0;
+                border-right: 1px solid rgba(212, 175, 55, 0.2);
+                border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+                border-radius: 0 0 15px 0;
+            }
+            
+            .nav.mobile-open {
+                left: 0;
+            }
+            
+            .nav a {
+                padding: 1.2rem 2rem;
+                margin: 0.2rem 1rem;
+                border-radius: 12px;
+                text-align: left;
+                border-left: 3px solid transparent;
+            }
+            
+            .auth-section {
+                position: fixed;
+                bottom: 0;
+                left: -100%;
+                width: 85%;
+                max-width: 350px;
+                height: 120px;
+                background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(45, 45, 45, 0.98) 100%);
+                padding: 1.5rem;
+                border-top: 2px solid rgba(212, 175, 55, 0.4);
+                border-right: 1px solid rgba(212, 175, 55, 0.2);
+                border-radius: 0 15px 0 0;
+                flex-direction: column;
+                justify-content: center;
+                align-items: stretch;
+                gap: 1rem;
+                transition: left 0.4s ease;
+                z-index: 1002;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+            }
+            
+            .auth-section.mobile-open {
+                left: 0;
+            }
+            
+            .auth-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .auth-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .mobile-menu-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 1000;
+                backdrop-filter: blur(5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">◆ BK Yatırım</div>
+            
+            <button class="mobile-menu-toggle" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <nav class="nav" id="nav">
+                <a href="#">Ana Sayfa</a>
+                <a href="#">İlanlar</a>
+                <a href="#">Favorilerim</a>
+            </nav>
+            
+            <div class="auth-section" id="auth-section">
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-secondary">Giriş Yap</a>
+                    <a href="#" class="btn btn-primary">Kayıt Ol</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="mobile-menu-overlay" id="overlay" onclick="closeMenu()" style="display: none;"></div>
+    
+    <main style="padding: 2rem; min-height: 100vh;">
+        <h1>Mobil Menü Test Sayfası</h1>
+        <p>Bu sayfa mobil menü sorununu test etmek için oluşturulmuştur.</p>
+        <p>Mobil cihazda hamburger menü butonuna tıklayın ve auth butonlarının görünüp görünmediğini kontrol edin.</p>
+        
+        <h2>Test Adımları:</h2>
+        <ol>
+            <li>Sayfayı mobil görünümde açın (F12 > Device Mode)</li>
+            <li>Hamburger menü butonuna tıklayın</li>
+            <li>Nav menüsünün açıldığını kontrol edin</li>
+            <li>Alt kısımda "Giriş Yap" ve "Kayıt Ol" butonlarının görünmesini kontrol edin</li>
+            <li>Overlay'e tıklayarak menünün kapandığını kontrol edin</li>
+        </ol>
+    </main>
+    
+    <script>
+        let isMenuOpen = false;
+        
+        function toggleMenu() {
+            const nav = document.getElementById('nav');
+            const authSection = document.getElementById('auth-section');
+            const overlay = document.getElementById('overlay');
+            
+            isMenuOpen = !isMenuOpen;
+            
+            if (isMenuOpen) {
+                nav.classList.add('mobile-open');
+                authSection.classList.add('mobile-open');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('mobile-open');
+                authSection.classList.remove('mobile-open');
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+        
+        function closeMenu() {
+            const nav = document.getElementById('nav');
+            const authSection = document.getElementById('auth-section');
+            const overlay = document.getElementById('overlay');
+            
+            isMenuOpen = false;
+            nav.classList.remove('mobile-open');
+            authSection.classList.remove('mobile-open');
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // Test için konsola log yazdır
+        console.log('Mobil Menü Test Sayfası Yüklendi');
+        console.log('Auth Section Element:', document.getElementById('auth-section'));
+        console.log('Nav Element:', document.getElementById('nav'));
+    </script>
+</body>
+</html>
