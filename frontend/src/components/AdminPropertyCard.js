@@ -29,7 +29,7 @@ const AdminPropertyCard = ({ property, onApprove, onReject, onView }) => {
       <div className="admin-property-image">
         {property.images && property.images.length > 0 ? (
           <img 
-            src={`https://bkyatirim.com${property.images[0]?.image_url}`} 
+            src={property.images[0]?.image_url || '/assets/images/no-image.jpg'} 
             alt={property.title}
           />
         ) : (

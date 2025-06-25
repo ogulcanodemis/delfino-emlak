@@ -77,7 +77,7 @@ const PropertyCard = ({ property, user, onFavoriteToggle, isFavorite }) => {
             onTouchEnd={hasMultipleImages ? onTouchEnd : undefined}
           >
             <img 
-              src={`https://bkyatirim.com${images[currentImageIndex]?.image_url}`} 
+              src={images[currentImageIndex]?.image_url || '/assets/images/no-image.jpg'} 
               alt={property.title}
               className="gallery-image"
               draggable={false}
@@ -146,7 +146,7 @@ const PropertyCard = ({ property, user, onFavoriteToggle, isFavorite }) => {
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              onFavoriteToggle && onFavoriteToggle(property.id);
+              onFavoriteToggle && onFavoriteToggle(property.id, isFavorite);
             }}
             title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
           >

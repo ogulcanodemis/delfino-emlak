@@ -646,14 +646,22 @@ class PropertyImageController {
     
     // Resim URL'si oluştur
     private function getImageUrl($image_path) {
-        // Eğer zaten relative path ise direkt kullan
-        if (strpos($image_path, '/') === 0 || strpos($image_path, 'uploads/') === 0) {
-            return '/' . ltrim($image_path, '/');
+        // Base URL'i tanımla
+        $base_url = 'https://bkyatirim.com/backend';
+        
+        // Eğer zaten tam URL ise direkt döndür
+        if (strpos($image_path, 'http') === 0) {
+            return $image_path;
         }
         
-        // Absolute path ise relative'e çevir
+        // Relative path ise tam URL'e çevir
+        if (strpos($image_path, 'uploads/') === 0) {
+            return $base_url . '/' . $image_path;
+        }
+        
+        // Absolute path ise relative'e çevirip tam URL yap
         $web_path = str_replace(__DIR__ . '/../../', '', $image_path);
-        return '/' . str_replace('\\', '/', $web_path);
+        return $base_url . '/' . str_replace('\\', '/', $web_path);
     }
     
     // Thumbnail URL'si oluştur

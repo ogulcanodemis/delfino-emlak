@@ -333,7 +333,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                 {property.images.map((image, index) => (
                   <div key={index} className="image-item" onClick={() => openImageModal(index)}>
                     <img 
-                      src={`https://bkyatirim.com/backend/${image.image_path}`}
+                      src={image.image_url || `https://bkyatirim.com/backend/${image.image_path}`}
                       alt={`${property.title} - Resim ${index + 1}`}
                       onError={(e) => {
                         e.target.src = '/placeholder-property.jpg';
@@ -357,7 +357,7 @@ const AdminPropertyDetailPage = ({ user }) => {
                 
                 <div className="modal-image-container">
                   <img 
-                    src={`https://bkyatirim.com/backend/${property.images[selectedImageIndex].image_path}`}
+                    src={property.images[selectedImageIndex].image_url || `https://bkyatirim.com/backend/${property.images[selectedImageIndex].image_path}`}
                     alt={`${property.title} - Resim ${selectedImageIndex + 1}`}
                     onError={(e) => {
                       e.target.src = '/placeholder-property.jpg';

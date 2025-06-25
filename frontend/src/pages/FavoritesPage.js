@@ -141,7 +141,7 @@ const FavoritesPage = ({ user }) => {
                         <PropertyCard 
                           property={propertyData}
                           user={user}
-                          onFavoriteToggle={() => handleRemoveFromFavorites(favorite.property_id)}
+                          onFavoriteToggle={(propertyId, isFavorite) => handleRemoveFromFavorites(propertyId)}
                           isFavorite={true}
                         />
                       </div>
