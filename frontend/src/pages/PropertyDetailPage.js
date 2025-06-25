@@ -150,7 +150,7 @@ const PropertyDetailPage = ({ user }) => {
                 <>
                   <div className="main-image">
                     <img 
-                      src={currentImage?.image_url || `https://bkyatirim.com/backend/${currentImage?.image_path}`} 
+                      src={currentImage?.image_url || `https://bkyatirim.com/${currentImage?.image_path}`} 
                       alt={property.title}
                     />
                     {images.length > 1 && (
@@ -180,7 +180,7 @@ const PropertyDetailPage = ({ user }) => {
                       {images.map((image, index) => (
                         <img
                           key={image.id}
-                          src={image.image_url || `https://bkyatirim.com/backend/${image.image_path}`}
+                          src={image.image_url || `https://bkyatirim.com/${image.image_path}`}
                           alt={`${property.title} - ${index + 1}`}
                           className={index === currentImageIndex ? 'active' : ''}
                           onClick={() => setCurrentImageIndex(index)}

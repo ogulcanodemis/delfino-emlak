@@ -7,7 +7,8 @@ class FileUploadService {
     private $max_files_per_property;
     
     public function __construct() {
-        $this->upload_path = $_SERVER['DOCUMENT_ROOT'] . '/uploads/properties/';
+        // Canlı sunucu ve local için uyumlu upload path
+        $this->upload_path = __DIR__ . '/../../uploads/properties/';
         $this->allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $this->max_file_size = 5 * 1024 * 1024; // 5MB
         $this->max_files_per_property = 20;
@@ -57,7 +58,7 @@ class FileUploadService {
                 $image_info = getimagesize($upload_path);
                 
                 // Relative path oluştur (web erişimi için)
-                $relative_path = str_replace(__DIR__ . '/../../', '', $upload_path);
+                $relative_path = str_replace($this->upload_path, 'uploads/properties/', $upload_path);
                 
                 return [
                     'success' => true,

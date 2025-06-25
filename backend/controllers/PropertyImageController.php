@@ -641,13 +641,22 @@ class PropertyImageController {
         $property = new Property($db);
         $property_data = $property->getById($property_id);
         
-        return $property_data && $property_data['user_id'] == $user_id;
+        // Debug logging
+        error_log("PropertyOwnership Check - Property ID: " . $property_id . ", User ID: " . $user_id);
+        if ($property_data) {
+            error_log("Property Data - Owner ID: " . $property_data['user_id'] . " (type: " . gettype($property_data['user_id']) . ")");
+            error_log("Comparison: " . (int)$property_data['user_id'] . " === " . (int)$user_id);
+        } else {
+            error_log("Property not found for ID: " . $property_id);
+        }
+        
+        return $property_data && (int)$property_data['user_id'] === (int)$user_id;
     }
     
     // Resim URL'si oluştur
     private function getImageUrl($image_path) {
         // Base URL'i tanımla
-        $base_url = 'https://bkyatirim.com/backend';
+        $base_url = 'https://bkyatirim.com';
         
         // Eğer zaten tam URL ise direkt döndür
         if (strpos($image_path, 'http') === 0) {
