@@ -18,6 +18,43 @@ const PropertyDetailPage = ({ user }) => {
   const [showContactForm, setShowContactForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
   const [activeTab, setActiveTab] = useState('description'); // 'description' or 'location'
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
+
+  // Modal keyboard navigation
+  useEffect(() => {
+    const images = property?.images || [];
+    
+    const handleKeyPress = (e) => {
+      if (!showImageModal || images.length === 0) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          setShowImageModal(false);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          setModalImageIndex(modalImageIndex === 0 ? images.length - 1 : modalImageIndex - 1);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setModalImageIndex(modalImageIndex === images.length - 1 ? 0 : modalImageIndex + 1);
+          break;
+        default:
+          break;
+      }
+    };
+
+    if (showImageModal) {
+      document.addEventListener('keydown', handleKeyPress);
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+      document.body.style.overflow = 'unset'; // Restore scroll
+    };
+  }, [showImageModal, modalImageIndex, property?.images]);
 
   useEffect(() => {
     loadProperty();
@@ -78,6 +115,13 @@ const PropertyDetailPage = ({ user }) => {
     });
   };
 
+  // HTML entity'leri decode et
+  const decodeHtml = (html) => {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
   if (loading) {
     return (
       <div className="page-container">
@@ -122,8 +166,7 @@ const PropertyDetailPage = ({ user }) => {
   const currentImage = images[currentImageIndex];
 
   return (
-    <div className="page-container">
-      <div className="property-detail">
+    <div className="page-container property-detail">
         {/* Header */}
         <div className="property-header">
           <button onClick={() => navigate(-1)} className="back-btn">
@@ -157,10 +200,14 @@ const PropertyDetailPage = ({ user }) => {
             <div className="property-gallery">
               {images.length > 0 ? (
                 <>
-                  <div className="main-image">
+                  <div className="main-image" data-count={`${currentImageIndex + 1} / ${images.length}`}>
                     <img 
                       src={currentImage?.image_url || `https://bkyatirim.com/${currentImage?.image_path}`} 
                       alt={property.title}
+                      onClick={() => {
+                        setModalImageIndex(currentImageIndex);
+                        setShowImageModal(true);
+                      }}
                     />
                     {images.length > 1 && (
                       <>
@@ -193,6 +240,10 @@ const PropertyDetailPage = ({ user }) => {
                           alt={`${property.title} - ${index + 1}`}
                           className={index === currentImageIndex ? 'active' : ''}
                           onClick={() => setCurrentImageIndex(index)}
+                          onDoubleClick={() => {
+                            setModalImageIndex(index);
+                            setShowImageModal(true);
+                          }}
                         />
                       ))}
                     </div>
@@ -230,7 +281,7 @@ const PropertyDetailPage = ({ user }) => {
                   <div className="tab-pane active">
                     <div className="property-description">
                       <h3>◆ Açıklama</h3>
-                      <p>{property.description || 'Bu ilan için açıklama bulunmuyor.'}</p>
+                      <p>{decodeHtml(property.description || 'Bu ilan için açıklama bulunmuyor.')}</p>
                     </div>
                   </div>
                 )}
@@ -273,7 +324,7 @@ const PropertyDetailPage = ({ user }) => {
           <div className="property-info-section">
             <div className="property-main">
             <div className="property-title-section">
-              <h1>{property.title}</h1>
+              <h1>{decodeHtml(property.title || '')}</h1>
               <div className="property-badges">
                 <span className="status-badge">{property.status_name}</span>
                 {property.is_featured && <span className="featured-badge">⭐ Öne Çıkan</span>}
@@ -592,7 +643,63 @@ const PropertyDetailPage = ({ user }) => {
             onClose={() => setShowReportForm(false)}
           />
         )}
-      </div>
+
+        {/* Image Modal/Lightbox */}
+        {showImageModal && images.length > 0 && (
+          <div 
+            className="property-detail-image-modal" 
+            onClick={() => setShowImageModal(false)}
+            role="dialog"
+            aria-label="Resim galerisi"
+            aria-modal="true"
+          >
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="modal-close"
+                onClick={() => setShowImageModal(false)}
+                title="Kapat"
+              >
+                ×
+              </button>
+              
+              <div className="modal-image-container">
+                <img 
+                  src={images[modalImageIndex]?.image_url || `https://bkyatirim.com/${images[modalImageIndex]?.image_path}`}
+                  alt={`${property.title} - ${modalImageIndex + 1}`}
+                  className="modal-image"
+                />
+                
+                {images.length > 1 && (
+                  <>
+                    <button 
+                      className="modal-nav prev"
+                      onClick={() => {
+                        setModalImageIndex(modalImageIndex === 0 ? images.length - 1 : modalImageIndex - 1);
+                      }}
+                      title="Önceki resim"
+                    >
+                      ‹
+                    </button>
+                    <button 
+                      className="modal-nav next"
+                      onClick={() => {
+                        setModalImageIndex(modalImageIndex === images.length - 1 ? 0 : modalImageIndex + 1);
+                      }}
+                      title="Sonraki resim"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+              </div>
+              
+              <div className="modal-info">
+                <span className="image-counter">{modalImageIndex + 1} / {images.length}</span>
+                <span className="image-title">{property.title}</span>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 };

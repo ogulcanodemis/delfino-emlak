@@ -1,33 +1,253 @@
-/* Property Detail Page - Tab Styles */
-.property-tabs-section {
-  margin: 1.5rem 0;
+/* Property Detail Page Styles - Mobile First Approach */
+
+/* =================================
+   CRITICAL MOBILE OVERRIDES
+   ================================= */
+
+/* Force full width container on mobile */
+.property-detail.page-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
 }
 
-/* Tab Navigation Styles */
+/* Override App.css property-content-layout completely for mobile */
+.property-detail .property-content-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  margin: 0 !important;
+  padding: 0.5rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.property-detail .property-gallery-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+}
+
+.property-detail .property-info-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* =================================
+   IMAGE GALLERY STYLES - MOBILE OPTIMIZED
+   ================================= */
+
+.property-detail .property-gallery {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 0 0 1rem 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.property-detail .property-gallery .main-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f8f9fa;
+  cursor: pointer;
+}
+
+.property-detail .property-gallery .main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+  background: #f8f9fa;
+}
+
+.property-detail .property-gallery .main-image:hover img {
+  transform: scale(1.02);
+}
+
+.property-detail .property-gallery .gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.property-detail .property-gallery .gallery-nav:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.property-detail .property-gallery .gallery-nav.prev {
+  left: 8px;
+}
+
+.property-detail .property-gallery .gallery-nav.next {
+  right: 8px;
+}
+
+.property-detail .property-gallery .image-thumbnails {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: #f8f9fa;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d4af37 #f8f9fa;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.property-detail .property-gallery .image-thumbnails::-webkit-scrollbar {
+  height: 4px;
+}
+
+.property-detail .property-gallery .image-thumbnails::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+.property-detail .property-gallery .image-thumbnails::-webkit-scrollbar-thumb {
+  background: #d4af37;
+  border-radius: 2px;
+}
+
+.property-detail .property-gallery .image-thumbnails img {
+  width: 45px;
+  height: 34px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.property-detail .property-gallery .image-thumbnails img:hover {
+  border-color: #d4af37;
+  transform: scale(1.05);
+}
+
+.property-detail .property-gallery .image-thumbnails img.active {
+  border-color: #d4af37;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.property-detail .property-gallery .no-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.property-detail .property-gallery .no-images span {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.property-detail .property-gallery .no-images p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.property-detail .property-gallery .main-image::after {
+  content: attr(data-count);
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* =================================
+   PROPERTY INFO STYLES - MOBILE
+   ================================= */
+
+.property-detail .property-title-section h1 {
+  font-size: 1.2rem !important;
+  line-height: 1.3 !important;
+  margin: 0.5rem !important;
+  padding: 0.5rem !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  color: #333;
+}
+
+/* =================================
+   TAB STYLES - MOBILE OPTIMIZED
+   ================================= */
+
+.property-tabs-section {
+  margin: 1rem 0;
+}
+
 .tab-navigation {
   display: flex;
   background: #f8f9fa;
-  border-radius: 8px;
-  padding: 4px;
-  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  padding: 3px;
+  margin-bottom: 1rem;
   border: 1px solid #e9ecef;
 }
 
 .tab-button {
   flex: 1;
-  padding: 12px 20px;
+  padding: 8px 12px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 12px;
   color: #6c757d;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .tab-button:hover {
@@ -38,11 +258,11 @@
 .tab-button.active {
   background: #d4af37;
   color: white;
-  box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 1px 3px rgba(212, 175, 55, 0.3);
 }
 
 .tab-content {
-  min-height: 200px;
+  min-height: 150px;
 }
 
 .tab-pane {
@@ -55,83 +275,240 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Property Description in Tab */
 .property-description {
   background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
+  padding: 1rem;
+  border-radius: 6px;
   border: 1px solid #e9ecef;
+  margin: 0 0.5rem;
 }
 
 .property-description h3 {
   color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
 }
 
 .property-description p {
-  line-height: 1.6;
+  line-height: 1.5;
   color: #495057;
   margin: 0;
+  font-size: 0.9rem;
 }
 
-/* Property Location Tab */
 .property-location-tab {
   background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
+  padding: 1rem;
+  border-radius: 6px;
   border: 1px solid #e9ecef;
+  margin: 0 0.5rem;
 }
 
 .property-location-tab h3 {
   color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
 }
 
 .location-details {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   background: #f8f9fa;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 .location-details p {
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   color: #495057;
+  font-size: 0.85rem;
 }
 
 .location-details strong {
   color: #2c3e50;
 }
 
-/* Map Container in Tab */
 .property-map-container {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .property-map-container .map-selector {
   margin: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
 }
 
 .no-location {
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem;
   color: #6c757d;
   background: #f8f9fa;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 2px dashed #dee2e6;
 }
 
-/* Property Detail Agent Card - Specific to this page */
+/* =================================
+   TABLET STYLES (481px - 768px)
+   ================================= */
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .property-detail.page-container {
+    padding: 1rem !important;
+  }
+  
+  .property-detail .property-content-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 0 !important;
+  }
+  
+  .property-detail .property-gallery .main-image {
+    height: 280px;
+  }
+  
+  .property-detail .property-gallery .image-thumbnails img {
+    width: 60px;
+    height: 45px;
+  }
+  
+  .property-detail .property-title-section h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* =================================
+   DESKTOP STYLES (769px+)
+   ================================= */
+
+@media (min-width: 769px) {
+  .property-detail.page-container {
+    padding: 2rem 1rem !important;
+  }
+  
+  .property-detail .property-content-layout {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+    margin-bottom: 3rem !important;
+    padding: 0 !important;
+  }
+  
+  .property-detail .property-gallery-section {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  }
+  
+  .property-detail .property-gallery {
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .property-detail .property-gallery .main-image {
+    height: auto;
+    aspect-ratio: 16/10;
+    max-height: 400px;
+  }
+  
+  .property-detail .property-gallery .gallery-nav {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .property-detail .property-gallery .gallery-nav.prev {
+    left: 15px;
+  }
+  
+  .property-detail .property-gallery .gallery-nav.next {
+    right: 15px;
+  }
+  
+  .property-detail .property-gallery .image-thumbnails {
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .property-detail .property-gallery .image-thumbnails img {
+    width: 80px;
+    height: 60px;
+    border-radius: 6px;
+  }
+  
+  .property-detail .property-title-section h1 {
+    font-size: 1.8rem !important;
+    padding: 0 !important;
+    margin: 0 0 1rem 0 !important;
+  }
+  
+  .tab-button {
+    padding: 12px 20px;
+    font-size: 14px;
+    gap: 8px;
+  }
+  
+  .property-description,
+  .property-location-tab {
+    padding: 1.5rem;
+    margin: 0;
+  }
+  
+  .property-description h3,
+  .property-location-tab h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .property-description p {
+    font-size: 1rem;
+  }
+  
+  .location-details {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .location-details p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+  }
+}
+
+/* =================================
+   LARGE DESKTOP (1200px+)
+   ================================= */
+
+@media (min-width: 1200px) {
+  .property-detail .property-content-layout {
+    grid-template-columns: 1.5fr 1fr !important;
+    gap: 3rem !important;
+    max-width: 1400px;
+    margin: 0 auto 3rem auto;
+  }
+  
+  .property-detail .property-title-section h1 {
+    font-size: 2rem !important;
+  }
+}
+
+/* =================================
+   AGENT CARD STYLES
+   ================================= */
+
 .property-detail .agent-card .agent-profile {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -141,8 +518,8 @@
 }
 
 .property-detail .agent-card .profile-image {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #d4af37;
@@ -151,8 +528,8 @@
 }
 
 .property-detail .agent-card .profile-placeholder {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border: 2px solid #dee2e6;
@@ -164,7 +541,7 @@
 }
 
 .property-detail .agent-card .placeholder-icon {
-  font-size: 20px;
+  font-size: 16px;
   color: #6c757d;
 }
 
@@ -174,7 +551,7 @@
 }
 
 .property-detail .agent-card .agent-details .agent-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #2c3e50;
   margin: 0 0 0.25rem 0;
@@ -184,7 +561,7 @@
 .property-detail .agent-card .agent-details .agent-phone,
 .property-detail .agent-card .agent-details .agent-email {
   margin: 0.125rem 0;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #495057;
   line-height: 1.3;
 }
@@ -202,81 +579,221 @@
   text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .property-tabs-section {
-    margin: 1rem -1rem;
-  }
-  
-  .tab-navigation {
-    margin: 0 1rem 1rem 1rem;
-  }
-  
-  .property-description,
-  .property-location-tab {
-    margin: 0 1rem;
-    padding: 1rem;
-  }
-  
-  .tab-button {
-    padding: 10px 15px;
-    font-size: 13px;
-  }
-  
-  .property-detail .agent-card .agent-profile {
-    gap: 0.5rem;
-  }
-  
+@media (min-width: 769px) {
   .property-detail .agent-card .profile-image,
   .property-detail .agent-card .profile-placeholder {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
   
   .property-detail .agent-card .placeholder-icon {
-    font-size: 16px;
+    font-size: 20px;
   }
   
   .property-detail .agent-card .agent-details .agent-name {
     font-size: 1rem;
   }
+  
+  .property-detail .agent-card .agent-details .agent-phone,
+  .property-detail .agent-card .agent-details .agent-email {
+    font-size: 0.875rem;
+  }
 }
 
-@media (max-width: 480px) {
-  .tab-button {
-    padding: 8px 12px;
-    font-size: 12px;
-    gap: 4px;
+/* =================================
+   IMAGE MODAL/LIGHTBOX STYLES
+   ================================= */
+
+.property-detail-image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.property-detail-image-modal .modal-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.property-detail-image-modal .modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10001;
+}
+
+.property-detail-image-modal .modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.property-detail-image-modal .modal-image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 90vw;
+  max-height: 85vh;
+}
+
+.property-detail-image-modal .modal-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: imageZoomIn 0.3s ease;
+}
+
+@keyframes imageZoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.property-detail-image-modal .modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10001;
+}
+
+.property-detail-image-modal .modal-nav:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.property-detail-image-modal .modal-nav.prev {
+  left: 10px;
+}
+
+.property-detail-image-modal .modal-nav.next {
+  right: 10px;
+}
+
+.property-detail-image-modal .modal-info {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: white;
+}
+
+.property-detail-image-modal .image-counter {
+  font-weight: 500;
+}
+
+.property-detail-image-modal .image-title {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .property-detail-image-modal .modal-close {
+    top: -50px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
   }
   
-  .property-description,
-  .property-location-tab {
-    padding: 0.75rem;
+  .property-detail-image-modal .modal-close:hover {
+    background: white;
   }
   
-  .property-description h3,
-  .property-location-tab h3 {
-    font-size: 1.1rem;
+  .property-detail-image-modal .modal-nav {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
   }
   
-  .property-detail .agent-card .agent-profile {
-    flex-direction: row;
+  .property-detail-image-modal .modal-nav:hover {
+    background: white;
+  }
+  
+  .property-detail-image-modal .modal-nav.prev {
+    left: -80px;
+  }
+  
+  .property-detail-image-modal .modal-nav.next {
+    right: -80px;
+  }
+  
+  .property-detail-image-modal .modal-info {
+    position: static;
+    transform: none;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    text-align: left;
-    gap: 0.5rem;
-  }
-  
-  .property-detail .agent-card .profile-image,
-  .property-detail .agent-card .profile-placeholder {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .property-detail .agent-card .placeholder-icon {
+    margin-top: 15px;
+    padding: 0 20px;
+    background: transparent;
+    color: white;
     font-size: 14px;
   }
   
-  .property-detail .agent-card .agent-details .agent-name {
-    font-size: 0.95rem;
+  .property-detail-image-modal .image-counter {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+  
+  .property-detail-image-modal .image-title {
+    display: block;
+    font-weight: 600;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
