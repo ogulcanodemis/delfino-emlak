@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateProfile, getUserProfile, canAccessAdminPanel } from '../services/apiService';
+import ProfileImageUploader from '../components/ProfileImageUploader';
 import './ProfilePage.css';
 
 const ProfilePage = ({ user, onUserUpdate }) => {
@@ -151,9 +152,22 @@ const ProfilePage = ({ user, onUserUpdate }) => {
         <div className="profile-content">
           <div className="profile-sidebar">
             <div className="profile-avatar">
-              <div className="avatar-placeholder">
-                {profile.name ? profile.name.charAt(0).toUpperCase() : '👤'}
-              </div>
+              <ProfileImageUploader 
+                user={user} 
+                onUserUpdate={onUserUpdate}
+                onImageUpdate={(imageUrl) => {
+                  // Profil resmi güncellendiğinde sidebar'ı yenile
+                  if (onUserUpdate && user) {
+                    const updatedUser = { ...user };
+                    if (imageUrl) {
+                      updatedUser.profile_image = imageUrl;
+                    } else {
+                      updatedUser.profile_image = null;
+                    }
+                    onUserUpdate(updatedUser);
+                  }
+                }}
+              />
               <h3>{profile.name || 'İsimsiz Kullanıcı'}</h3>
               <p className="user-role">{getRoleName(user.role_id)}</p>
               <p className="member-since">

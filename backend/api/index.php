@@ -297,6 +297,20 @@ function handleAuthEndpoint($db, $method, $segments) {
             $authController->deleteAccount();
             break;
             
+        case 'upload-profile-image':
+            if ($method !== 'POST') {
+                Response::error('Bu endpoint sadece POST metodunu destekler', 405);
+            }
+            $authController->uploadProfileImage();
+            break;
+            
+        case 'delete-profile-image':
+            if ($method !== 'DELETE') {
+                Response::error('Bu endpoint sadece DELETE metodunu destekler', 405);
+            }
+            $authController->deleteProfileImage();
+            break;
+            
         default:
             Response::notFound('Auth endpoint bulunamadı: ' . $action);
     }

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ImageUploader.css';
 
-const ImageUploader = ({ images, onImagesChange, maxImages = 10, existingImages = [], onDeleteExisting, onSetPrimaryExisting }) => {
+const ImageUploader = ({ images, onImagesChange, maxImages = 30, existingImages = [], onDeleteExisting, onSetPrimaryExisting }) => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 

@@ -4,6 +4,8 @@ import { getProperty, addToFavorites, removeFromFavorites, canViewPrice } from '
 import ContactForm from '../components/ContactForm';
 import SimilarProperties from '../components/SimilarProperties';
 import ReportForm from '../components/ReportForm';
+import MapSelector from '../components/MapSelector';
+import './PropertyDetailPage.css';
 
 const PropertyDetailPage = ({ user }) => {
   const { id: propertyId } = useParams();
@@ -15,6 +17,7 @@ const PropertyDetailPage = ({ user }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showContactForm, setShowContactForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
+  const [activeTab, setActiveTab] = useState('description'); // 'description' or 'location'
 
   useEffect(() => {
     loadProperty();
@@ -24,6 +27,12 @@ const PropertyDetailPage = ({ user }) => {
     try {
       setLoading(true);
       const data = await getProperty(propertyId);
+      console.log('🔍 FULL Property data:', data); // Debug için
+      console.log('👤 User ID:', data.user_id);
+      console.log('👤 User Name:', data.user_name);
+      console.log('🖼️ User profile image:', data.user_profile_image); // Debug için
+      console.log('🖼️ Profile image type:', typeof data.user_profile_image);
+      console.log('🖼️ Profile image length:', data.user_profile_image?.length);
       setProperty(data);
     } catch (error) {
       setError('İlan detayları yüklenirken bir hata oluştu: ' + error.message);
@@ -197,10 +206,66 @@ const PropertyDetailPage = ({ user }) => {
               )}
             </div>
             
-            {/* Property Description - Moved here for better UX */}
-            <div className="property-description">
-              <h3>◆ Açıklama</h3>
-              <p>{property.description || 'Bu ilan için açıklama bulunmuyor.'}</p>
+            {/* Tab Navigation & Content */}
+            <div className="property-tabs-section">
+              <div className="tab-navigation">
+                <button
+                  type="button"
+                  className={`tab-button ${activeTab === 'description' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('description')}
+                >
+                  📝 Açıklama
+                </button>
+                <button
+                  type="button"
+                  className={`tab-button ${activeTab === 'location' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('location')}
+                >
+                  🗺️ Konum
+                </button>
+              </div>
+
+              <div className="tab-content">
+                {activeTab === 'description' && (
+                  <div className="tab-pane active">
+                    <div className="property-description">
+                      <h3>◆ Açıklama</h3>
+                      <p>{property.description || 'Bu ilan için açıklama bulunmuyor.'}</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'location' && (
+                  <div className="tab-pane active">
+                    <div className="property-location-tab">
+                      <h3>🗺️ Konum Bilgileri</h3>
+                      <div className="location-details">
+                        <p><strong>Adres:</strong> {property.address}</p>
+                        <p><strong>Bölge:</strong> {property.neighborhood_name && `${property.neighborhood_name}, `}
+                           {property.district_name}, {property.city_name}</p>
+                      </div>
+                      
+                      {/* Harita - Eğer koordinatlar varsa göster */}
+                      {property.latitude && property.longitude ? (
+                        <div className="property-map-container">
+                          <MapSelector
+                            latitude={parseFloat(property.latitude)}
+                            longitude={parseFloat(property.longitude)}
+                            cityName={property.city_name}
+                            districtName={property.district_name}
+                            address={property.address}
+                            readonly={true}
+                          />
+                        </div>
+                      ) : (
+                        <div className="no-location">
+                          <p>Bu ilan için harita konumu belirtilmemiş.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -335,17 +400,69 @@ const PropertyDetailPage = ({ user }) => {
               <div className="agent-card">
                 <h3>◉ İlan Sahibi</h3>
                 <div className="agent-info">
-                  <p className="agent-name">{property.user_name}</p>
-                  {property.user_phone && (
-                    <p className="agent-phone">
-                      ☏ <a href={`tel:${property.user_phone}`}>{property.user_phone}</a>
-                    </p>
-                  )}
-                  {property.user_email && (
-                    <p className="agent-email">
-                      ✉ <a href={`mailto:${property.user_email}`}>{property.user_email}</a>
-                    </p>
-                  )}
+                  <div className="agent-profile">
+                    <div className="agent-avatar">
+                      {(() => {
+                        console.log('Profile image check:', {
+                          user_profile_image: property.user_profile_image,
+                          type: typeof property.user_profile_image,
+                          length: property.user_profile_image?.length,
+                          trimmed: property.user_profile_image?.trim()
+                        });
+                        
+                        const hasValidImage = property.user_profile_image && 
+                                            property.user_profile_image.trim() !== '' && 
+                                            property.user_profile_image !== 'null' && 
+                                            property.user_profile_image !== 'undefined';
+                                            
+                        if (hasValidImage) {
+                          const imageUrl = property.user_profile_image.startsWith('http') 
+                            ? property.user_profile_image 
+                            : `https://bkyatirim.com/${property.user_profile_image}`;
+                          
+                          console.log('Final image URL:', imageUrl);
+                          
+                          return (
+                            <img 
+                              src={imageUrl}
+                              alt={property.user_name}
+                              className="profile-image"
+                              onError={(e) => {
+                                console.log('Image load error:', e.target.src);
+                                e.target.style.display = 'none';
+                                e.target.parentNode.innerHTML = `
+                                  <div class="profile-placeholder">
+                                    <span class="placeholder-icon">👤</span>
+                                  </div>
+                                `;
+                              }}
+                              onLoad={() => console.log('Image loaded successfully:', imageUrl)}
+                            />
+                          );
+                        } else {
+                          console.log('Using placeholder - no valid image');
+                          return (
+                            <div className="profile-placeholder">
+                              <span className="placeholder-icon">👤</span>
+                            </div>
+                          );
+                        }
+                      })()}
+                    </div>
+                    <div className="agent-details">
+                      <p className="agent-name">{property.user_name}</p>
+                      {property.user_phone && (
+                        <p className="agent-phone">
+                          ☏ <a href={`tel:${property.user_phone}`}>{property.user_phone}</a>
+                        </p>
+                      )}
+                      {property.user_email && (
+                        <p className="agent-email">
+                          ✉ <a href={`mailto:${property.user_email}`}>{property.user_email}</a>
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="contact-actions">

@@ -166,6 +166,50 @@ class User {
 
         return $stmt->execute();
     }
+    
+    /**
+     * Profil resmini güncelle
+     */
+    public function updateProfileImage($image_path) {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET profile_image=:profile_image, updated_at=NOW()
+                  WHERE id=:id";
+
+        $stmt = $this->conn->prepare($query);
+        
+        // Veriyi temizle
+        $image_path = htmlspecialchars($image_path ?? '', ENT_QUOTES, 'UTF-8');
+
+        // Parametreleri bağla
+        $stmt->bindParam(":profile_image", $image_path);
+        $stmt->bindParam(":id", $this->id);
+
+        if ($stmt->execute()) {
+            $this->profile_image = $image_path;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Profil resmini sil
+     */
+    public function deleteProfileImage() {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET profile_image=NULL, updated_at=NOW()
+                  WHERE id=:id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $this->id);
+
+        if ($stmt->execute()) {
+            $this->profile_image = null;
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      * Şifre güncelle

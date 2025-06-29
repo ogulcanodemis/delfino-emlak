@@ -255,10 +255,10 @@ class ValidationMiddleware {
             return '';
         }
         
-        // HTML ve script taglarını temizle
-        $search = strip_tags($search);
+        // Sadece zararlı script taglarını temizle
+        $search = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $search);
         
-        // Özel karakterleri temizle
+        // Özel karakterleri güvenli hale getir (noktalama korunarak)
         $search = htmlspecialchars($search, ENT_QUOTES, 'UTF-8');
         
         // Minimum 2 karakter
@@ -316,14 +316,14 @@ class ValidationMiddleware {
             return array_map([self::class, 'sanitizeInput'], $input);
         }
         
-        return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 
     /**
      * SQL injection koruması için string temizleme
      */
     public static function sanitizeString($string) {
-        return htmlspecialchars(strip_tags(trim($string)), ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars(trim($string), ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -352,6 +352,20 @@ class ValidationMiddleware {
             $errors['area'] = 'Geçerli bir metrekare değeri giriniz (1-50000)';
         }
         
+        // Oda sayısı kontrolü
+        if (isset($data['rooms']) && !empty($data['rooms'])) {
+            if (!self::validateRooms($data['rooms'])) {
+                $errors['rooms'] = 'Geçersiz oda sayısı formatı';
+            }
+        }
+        
+        // Banyo sayısı kontrolü
+        if (isset($data['bathrooms']) && !empty($data['bathrooms'])) {
+            if (!self::validateBathrooms($data['bathrooms'])) {
+                $errors['bathrooms'] = 'Geçersiz banyo sayısı';
+            }
+        }
+        
         // Koordinat kontrolü
         if (isset($data['latitude']) && isset($data['longitude'])) {
             if (!self::validateCoordinates($data['latitude'], $data['longitude'])) {
@@ -360,6 +374,25 @@ class ValidationMiddleware {
         }
         
         return empty($errors) ? true : $errors;
+    }
+    
+    /**
+     * Oda sayısı formatını doğrula
+     */
+    private static function validateRooms($rooms) {
+        $validRoomOptions = [
+            '0+1', '1+0', '1+1', '2+1', '3+1', '4+1', '5+1', 
+            '6+1', '7+1', '8+1', '9+1', '10+'
+        ];
+        
+        return in_array($rooms, $validRoomOptions);
+    }
+    
+    /**
+     * Banyo sayısını doğrula
+     */
+    private static function validateBathrooms($bathrooms) {
+        return is_numeric($bathrooms) && $bathrooms >= 1 && $bathrooms <= 5;
     }
 }
 ?> 

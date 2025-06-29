@@ -2,19 +2,24 @@
 
 class FileUploadService {
     private $upload_path;
+    private $profile_upload_path;
     private $allowed_types;
     private $max_file_size;
     private $max_files_per_property;
+    private $max_profile_file_size;
     
     public function __construct() {
         // Canlı sunucu ve local için uyumlu upload path
         $this->upload_path = __DIR__ . '/../../uploads/properties/';
+        $this->profile_upload_path = __DIR__ . '/../../uploads/profiles/';
         $this->allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $this->max_file_size = 5 * 1024 * 1024; // 5MB
-        $this->max_files_per_property = 20;
+        $this->max_profile_file_size = 2 * 1024 * 1024; // 2MB (profil için daha küçük)
+        $this->max_files_per_property = 30;
         
-        // Upload klasörünü oluştur
+        // Upload klasörlerini oluştur
         $this->createUploadDirectory();
+        $this->createProfileUploadDirectory();
     }
     
     // Upload klasörünü oluştur
@@ -392,13 +397,152 @@ class FileUploadService {
         ];
     }
     
+    // Profil upload klasörünü oluştur
+    private function createProfileUploadDirectory() {
+        if (!file_exists($this->profile_upload_path)) {
+            mkdir($this->profile_upload_path, 0755, true);
+        }
+    }
+    
+    // Profil resmi yükle
+    public function uploadProfileImage($file, $user_id) {
+        try {
+            // Dosya kontrolü
+            $validation = $this->validateProfileFile($file);
+            if (!$validation['success']) {
+                return $validation;
+            }
+            
+            // Eski profil resmini sil
+            $this->deleteOldProfileImage($user_id);
+            
+            // Dosya adını oluştur
+            $file_info = $this->generateProfileFileName($file, $user_id);
+            $upload_path = $this->profile_upload_path . $file_info['filename'];
+            
+            // Dosyayı yükle
+            if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+                // Resmi boyutlandır (profil için optimum boyut)
+                $resized_path = $this->profile_upload_path . 'resized_' . $file_info['filename'];
+                $this->resizeImage($upload_path, $resized_path, 300, 300, 90);
+                
+                // Orijinal dosyayı sil, boyutlandırılmışı tut
+                unlink($upload_path);
+                rename($resized_path, $upload_path);
+                
+                // Relative path oluştur (web erişimi için)
+                $relative_path = str_replace($this->profile_upload_path, 'uploads/profiles/', $upload_path);
+                
+                return [
+                    'success' => true,
+                    'message' => 'Profil resmi başarıyla yüklendi',
+                    'data' => [
+                        'image_path' => $relative_path,
+                        'image_name' => $file_info['original_name'],
+                        'image_size' => filesize($upload_path)
+                    ]
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Profil resmi yüklenirken hata oluştu'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Profil resmi yükleme hatası: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    // Profil dosya doğrulama
+    private function validateProfileFile($file) {
+        // Upload hatası kontrolü
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return [
+                'success' => false,
+                'message' => $this->getUploadErrorMessage($file['error'])
+            ];
+        }
+        
+        // Dosya boyutu kontrolü (profil için 2MB limit)
+        if ($file['size'] > $this->max_profile_file_size) {
+            return [
+                'success' => false,
+                'message' => 'Profil resmi boyutu çok büyük (Max: ' . $this->formatBytes($this->max_profile_file_size) . ')'
+            ];
+        }
+        
+        // Dosya tipi kontrolü
+        if (!in_array($file['type'], $this->allowed_types)) {
+            return [
+                'success' => false,
+                'message' => 'Desteklenmeyen dosya formatı'
+            ];
+        }
+        
+        // Gerçek resim dosyası kontrolü
+        $image_info = getimagesize($file['tmp_name']);
+        if ($image_info === false) {
+            return [
+                'success' => false,
+                'message' => 'Geçersiz resim dosyası'
+            ];
+        }
+        
+        return ['success' => true];
+    }
+    
+    // Profil dosya adı oluştur
+    private function generateProfileFileName($file, $user_id) {
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $original_name = pathinfo($file['name'], PATHINFO_FILENAME);
+        
+        // Güvenli dosya adı oluştur
+        $safe_name = 'profile_' . $user_id . '_' . time();
+        $unique_name = $safe_name . '.' . $extension;
+        
+        return [
+            'filename' => $unique_name,
+            'original_name' => $file['name'],
+            'safe_name' => $safe_name,
+            'extension' => $extension
+        ];
+    }
+    
+    // Eski profil resmini sil
+    private function deleteOldProfileImage($user_id) {
+        // Kullanıcının mevcut profil resmini bul ve sil
+        $pattern = $this->profile_upload_path . 'profile_' . $user_id . '_*';
+        $files = glob($pattern);
+        
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+    }
+    
+    // Profil resmini sil
+    public function deleteProfileImage($user_id) {
+        $this->deleteOldProfileImage($user_id);
+        return [
+            'success' => true,
+            'message' => 'Profil resmi silindi'
+        ];
+    }
+    
     // Ayarları getir
     public function getSettings() {
         return [
             'upload_path' => $this->upload_path,
+            'profile_upload_path' => $this->profile_upload_path,
             'allowed_types' => $this->allowed_types,
             'max_file_size' => $this->max_file_size,
+            'max_profile_file_size' => $this->max_profile_file_size,
             'max_file_size_formatted' => $this->formatBytes($this->max_file_size),
+            'max_profile_file_size_formatted' => $this->formatBytes($this->max_profile_file_size),
             'max_files_per_property' => $this->max_files_per_property
         ];
     }

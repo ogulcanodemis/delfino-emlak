@@ -661,4 +661,65 @@ export const setPrimaryImage = async (imageId) => {
   }
   
   throw new Error('Ana fotoğraf belirlenemedi');
+};
+
+// ============ PROFILE IMAGE SERVİSLERİ ============
+
+export const uploadProfileImage = async (imageFile) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('Giriş yapmalısınız');
+  }
+
+  const formData = new FormData();
+  formData.append('profile_image', imageFile);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    // Response text'ini al
+    const responseText = await response.text();
+    
+    // Boş response kontrolü
+    if (!responseText) {
+      throw new Error('Sunucudan boş yanıt alındı');
+    }
+    
+    // JSON parse etmeye çalış
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse hatası:', parseError);
+      console.error('Response text:', responseText);
+      throw new Error('Sunucudan geçersiz yanıt alındı');
+    }
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Profil resmi yüklenemedi');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Profil resmi yükleme hatası:', error);
+    throw error;
+  }
+};
+
+export const deleteProfileImage = async () => {
+  const data = await apiCall('/auth/delete-profile-image', {
+    method: 'DELETE'
+  });
+  
+  if (data.status === 'success') {
+    return data.data;
+  }
+  
+  throw new Error('Profil resmi silinemedi');
 }; 

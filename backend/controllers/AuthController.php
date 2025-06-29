@@ -6,6 +6,7 @@
 
 require_once '../models/User.php';
 require_once '../utils/JWT.php';
+require_once '../services/FileUploadService.php';
 
 class AuthController {
     private $db;
@@ -359,6 +360,112 @@ class AuthController {
             }
         } catch (Exception $e) {
             Response::error('Hesap silme sırasında hata oluştu: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Profil resmi yükleme
+     */
+    public function uploadProfileImage() {
+        // JWT token kontrolü
+        $headers = getallheaders();
+        $auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+
+        if (!$auth_header || !preg_match('/Bearer\s+(.*)$/i', $auth_header, $matches)) {
+            Response::error('Token bulunamadı', 401);
+            return;
+        }
+
+        $token = $matches[1];
+        $payload = JWT::decode($token);
+        if (!$payload) {
+            Response::error('Geçersiz token', 401);
+            return;
+        }
+
+        // Dosya yükleme kontrolü
+        if (!isset($_FILES['profile_image']) || $_FILES['profile_image']['error'] !== UPLOAD_ERR_OK) {
+            Response::error('Profil resmi yüklenemedi', 400);
+            return;
+        }
+
+        try {
+            $fileUploadService = new FileUploadService();
+            $result = $fileUploadService->uploadProfileImage($_FILES['profile_image'], $payload['user_id']);
+
+            if ($result['success']) {
+                // Kullanıcının profil resmini veritabanında güncelle
+                $this->user->id = $payload['user_id'];
+                if ($this->user->updateProfileImage($result['data']['image_path'])) {
+                    // Güncellenmiş kullanıcı bilgilerini al
+                    $updated_user = $this->user->findById($payload['user_id']);
+                    unset($updated_user['password']);
+
+                    Response::success([
+                        'user' => $updated_user,
+                        'profile_image_url' => '/' . $result['data']['image_path']
+                    ], 'Profil resmi başarıyla yüklendi');
+                } else {
+                    Response::error('Profil resmi veritabanında güncellenemedi', 500);
+                }
+            } else {
+                Response::error($result['message'], 400);
+            }
+        } catch (Exception $e) {
+            Response::error('Profil resmi yükleme hatası: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Profil resmini silme
+     */
+    public function deleteProfileImage() {
+        // JWT token kontrolü
+        $headers = getallheaders();
+        $auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+
+        if (!$auth_header || !preg_match('/Bearer\s+(.*)$/i', $auth_header, $matches)) {
+            Response::error('Token bulunamadı', 401);
+            return;
+        }
+
+        $token = $matches[1];
+        $payload = JWT::decode($token);
+        if (!$payload) {
+            Response::error('Geçersiz token', 401);
+            return;
+        }
+
+        try {
+            // Mevcut profil resmini al
+            $user_data = $this->user->findById($payload['user_id']);
+            if (!$user_data) {
+                Response::error('Kullanıcı bulunamadı', 404);
+                return;
+            }
+
+            $fileUploadService = new FileUploadService();
+            
+            // Profil resmini veritabanından sil
+            $this->user->id = $payload['user_id'];
+            if ($this->user->deleteProfileImage()) {
+                // Fiziksel dosyayı sil (eğer varsa)
+                if (!empty($user_data['profile_image'])) {
+                    $fileUploadService->deleteProfileImage($payload['user_id']);
+                }
+
+                // Güncellenmiş kullanıcı bilgilerini al
+                $updated_user = $this->user->findById($payload['user_id']);
+                unset($updated_user['password']);
+
+                Response::success([
+                    'user' => $updated_user
+                ], 'Profil resmi başarıyla silindi');
+            } else {
+                Response::error('Profil resmi silinemedi', 500);
+            }
+        } catch (Exception $e) {
+            Response::error('Profil resmi silme hatası: ' . $e->getMessage(), 500);
         }
     }
 }

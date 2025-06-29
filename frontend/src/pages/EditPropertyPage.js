@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProperty, updateProperty, getPropertyTypes, getCities, getDistricts, getPropertyImages, uploadPropertyImages, deletePropertyImage, setPrimaryImage } from '../services/apiService';
 import ImageUploader from '../components/ImageUploader';
+import MapSelector from '../components/MapSelector';
+import { ROOM_OPTIONS, BATHROOM_OPTIONS } from '../utils/constants';
 import './EditPropertyPage.css';
 
 const EditPropertyPage = ({ user }) => {
@@ -16,6 +18,8 @@ const EditPropertyPage = ({ user }) => {
     address: '',
     city_id: '',
     district_id: '',
+    latitude: null,
+    longitude: null,
     area: '',
     rooms: '',
     bathrooms: '',
@@ -47,6 +51,7 @@ const EditPropertyPage = ({ user }) => {
   
   // Fotoğraf yönetimi
   const [existingImages, setExistingImages] = useState([]);
+  const [activeTab, setActiveTab] = useState('description'); // 'description' or 'location'
   const [newImages, setNewImages] = useState([]);
   const [imageLoading, setImageLoading] = useState(false);
 
@@ -115,6 +120,26 @@ const EditPropertyPage = ({ user }) => {
         loadDistricts(value);
       }
     }
+  };
+
+  // Harita konumu değiştiğinde
+  const handleLocationChange = (location) => {
+    setProperty(prev => ({
+      ...prev,
+      latitude: location.latitude,
+      longitude: location.longitude
+    }));
+  };
+
+  // Seçili şehir ve ilçe adlarını al
+  const getSelectedCityName = () => {
+    const city = cities.find(c => c.id == property.city_id);
+    return city ? city.name : '';
+  };
+
+  const getSelectedDistrictName = () => {
+    const district = districts.find(d => d.id == property.district_id);
+    return district ? district.name : '';
   };
 
   // Fotoğraf yönetimi fonksiyonları
@@ -299,17 +324,58 @@ const EditPropertyPage = ({ user }) => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description">Açıklama *</label>
-              <textarea
-                id="description"
-                name="description"
-                value={property.description}
-                onChange={handleChange}
-                required
-                rows="4"
-                placeholder="İlan açıklamasını girin"
-              />
+            {/* Tab Navigation */}
+            <div className="tab-navigation">
+              <button
+                type="button"
+                className={`tab-button ${activeTab === 'description' ? 'active' : ''}`}
+                onClick={() => setActiveTab('description')}
+              >
+                📝 Açıklama
+              </button>
+              <button
+                type="button"
+                className={`tab-button ${activeTab === 'location' ? 'active' : ''}`}
+                onClick={() => setActiveTab('location')}
+              >
+                🗺️ Konum
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="tab-content">
+              {activeTab === 'description' && (
+                <div className="tab-pane active">
+                  <div className="form-group">
+                    <label htmlFor="description">Açıklama *</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={property.description}
+                      onChange={handleChange}
+                      required
+                      rows="6"
+                      placeholder="İlan açıklamasını detaylı olarak girin..."
+                    />
+                    <small className="form-help">
+                      💡 Detaylı açıklama yazmak ilanınızın daha çok ilgi görmesini sağlar
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'location' && (
+                <div className="tab-pane active">
+                  <MapSelector
+                    latitude={property.latitude}
+                    longitude={property.longitude}
+                    onLocationChange={handleLocationChange}
+                    cityName={getSelectedCityName()}
+                    districtName={getSelectedDistrictName()}
+                    address={property.address}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-row">
@@ -403,29 +469,37 @@ const EditPropertyPage = ({ user }) => {
             
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="rooms">Oda Sayısı</label>
-                <input
-                  type="number"
+                <label htmlFor="rooms">Oda Sayısı *</label>
+                <select
                   id="rooms"
                   name="rooms"
                   value={property.rooms}
                   onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                />
+                  required
+                >
+                  {ROOM_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="bathrooms">Banyo Sayısı</label>
-                <input
-                  type="number"
+                <label htmlFor="bathrooms">Banyo Sayısı *</label>
+                <select
                   id="bathrooms"
                   name="bathrooms"
                   value={property.bathrooms}
                   onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                />
+                  required
+                >
+                  {BATHROOM_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -629,7 +703,7 @@ const EditPropertyPage = ({ user }) => {
               existingImages={existingImages}
               onDeleteExisting={handleDeleteExistingImage}
               onSetPrimaryExisting={handleSetPrimaryExisting}
-              maxImages={20}
+              maxImages={30}
             />
           </div>
 

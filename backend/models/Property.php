@@ -73,10 +73,10 @@ class Property {
 
         $stmt = $this->conn->prepare($query);
 
-        // Verileri temizle
-        $this->title = htmlspecialchars(strip_tags($this->title ?? ''));
-        $this->description = htmlspecialchars(strip_tags($this->description ?? ''));
-        $this->address = htmlspecialchars(strip_tags($this->address ?? ''));
+        // Verileri temizle (noktalama işaretlerini koruyarak)
+        $this->title = htmlspecialchars($this->title ?? '', ENT_QUOTES, 'UTF-8');
+        $this->description = htmlspecialchars($this->description ?? '', ENT_QUOTES, 'UTF-8');
+        $this->address = htmlspecialchars($this->address ?? '', ENT_QUOTES, 'UTF-8');
 
         // Parametreleri bağla
         $stmt->bindParam(":user_id", $this->user_id);
@@ -233,7 +233,8 @@ class Property {
                          n.name as neighborhood_name,
                          u.name as user_name,
                          u.email as user_email,
-                         u.phone as user_phone
+                         u.phone as user_phone,
+                         u.profile_image as user_profile_image
                   FROM " . $this->table_name . " p
                   LEFT JOIN property_types pt ON p.property_type_id = pt.id
                   LEFT JOIN property_status ps ON p.status_id = ps.id
@@ -245,20 +246,33 @@ class Property {
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
+        
+        // Debug: SQL sorgusunu logla
+        error_log("Property getById SQL: " . $query);
+        error_log("Property ID parameter: " . $id);
+        
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
             $property = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Debug log - fetched data
+            error_log("Property getById - FETCHED user_profile_image: " . ($property['user_profile_image'] ?? 'NULL'));
+            error_log("Property getById - ALL FETCHED KEYS: " . implode(', ', array_keys($property)));
             
             // Ziyaretçiler için fiyat ve iletişim bilgilerini gizle
             if ($user_role === null) {
                 $property['price'] = null;
                 $property['user_email'] = null;
                 $property['user_phone'] = null;
+                // Not: user_profile_image gizlenmez, herkese açık
             }
             
             // İlan görsellerini getir
             $property['images'] = $this->getPropertyImages($id);
+            
+            // Debug log - final return data
+            error_log("Property getById - FINAL RETURN user_profile_image: " . ($property['user_profile_image'] ?? 'NULL'));
             
             return $property;
         }
@@ -278,7 +292,8 @@ class Property {
                          n.name as neighborhood_name,
                          u.name as user_name,
                          u.email as user_email,
-                         u.phone as user_phone
+                         u.phone as user_phone,
+                         u.profile_image as user_profile_image
                   FROM " . $this->table_name . " p
                   LEFT JOIN property_types pt ON p.property_type_id = pt.id
                   LEFT JOIN property_status ps ON p.status_id = ps.id
@@ -421,10 +436,10 @@ class Property {
             $this->heating_type = 'Doğalgaz'; // Default değer
         }
 
-        // Verileri temizle
-        $this->title = htmlspecialchars(strip_tags($this->title ?? ''));
-        $this->description = htmlspecialchars(strip_tags($this->description ?? ''));
-        $this->address = htmlspecialchars(strip_tags($this->address ?? ''));
+        // Verileri temizle (noktalama işaretlerini koruyarak)
+        $this->title = htmlspecialchars($this->title ?? '', ENT_QUOTES, 'UTF-8');
+        $this->description = htmlspecialchars($this->description ?? '', ENT_QUOTES, 'UTF-8');
+        $this->address = htmlspecialchars($this->address ?? '', ENT_QUOTES, 'UTF-8');
 
         // Parametreleri bağla
         $stmt->bindParam(":title", $this->title);

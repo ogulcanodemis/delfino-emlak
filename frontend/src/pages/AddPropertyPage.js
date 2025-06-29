@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createProperty, getPropertyTypes, getCities, getDistricts, uploadPropertyImages } from '../services/apiService';
 import ImageUploader from '../components/ImageUploader';
+import MapSelector from '../components/MapSelector';
+import { ROOM_OPTIONS, BATHROOM_OPTIONS } from '../utils/constants';
 import './AddPropertyPage.css';
 
 const AddPropertyPage = ({ user }) => {
@@ -15,6 +17,8 @@ const AddPropertyPage = ({ user }) => {
     address: '',
     city_id: '',
     district_id: '',
+    latitude: null,
+    longitude: null,
     area: '',
     rooms: '',
     bathrooms: '',
@@ -44,6 +48,7 @@ const AddPropertyPage = ({ user }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [images, setImages] = useState([]);
+  const [activeTab, setActiveTab] = useState('description'); // 'description' or 'location'
 
   useEffect(() => {
     loadInitialData();
@@ -100,6 +105,26 @@ const AddPropertyPage = ({ user }) => {
         loadDistricts(value);
       }
     }
+  };
+
+  // Harita konumu değiştiğinde
+  const handleLocationChange = (location) => {
+    setProperty(prev => ({
+      ...prev,
+      latitude: location.latitude,
+      longitude: location.longitude
+    }));
+  };
+
+  // Seçili şehir ve ilçe adlarını al
+  const getSelectedCityName = () => {
+    const city = cities.find(c => c.id == property.city_id);
+    return city ? city.name : '';
+  };
+
+  const getSelectedDistrictName = () => {
+    const district = districts.find(d => d.id == property.district_id);
+    return district ? district.name : '';
   };
 
   const handleSubmit = async (e) => {
@@ -243,17 +268,58 @@ const AddPropertyPage = ({ user }) => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description">Açıklama *</label>
-              <textarea
-                id="description"
-                name="description"
-                value={property.description}
-                onChange={handleChange}
-                required
-                rows="4"
-                placeholder="İlan açıklamasını girin"
-              />
+            {/* Tab Navigation */}
+            <div className="tab-navigation">
+              <button
+                type="button"
+                className={`tab-button ${activeTab === 'description' ? 'active' : ''}`}
+                onClick={() => setActiveTab('description')}
+              >
+                📝 Açıklama
+              </button>
+              <button
+                type="button"
+                className={`tab-button ${activeTab === 'location' ? 'active' : ''}`}
+                onClick={() => setActiveTab('location')}
+              >
+                🗺️ Konum
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="tab-content">
+              {activeTab === 'description' && (
+                <div className="tab-pane active">
+                  <div className="form-group">
+                    <label htmlFor="description">Açıklama *</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={property.description}
+                      onChange={handleChange}
+                      required
+                      rows="6"
+                      placeholder="İlan açıklamasını detaylı olarak girin..."
+                    />
+                    <small className="form-help">
+                      💡 Detaylı açıklama yazmak ilanınızın daha çok ilgi görmesini sağlar
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'location' && (
+                <div className="tab-pane active">
+                  <MapSelector
+                    latitude={property.latitude}
+                    longitude={property.longitude}
+                    onLocationChange={handleLocationChange}
+                    cityName={getSelectedCityName()}
+                    districtName={getSelectedDistrictName()}
+                    address={property.address}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-row">
@@ -339,6 +405,9 @@ const AddPropertyPage = ({ user }) => {
                 rows="2"
                 placeholder="Detaylı adres bilgisi"
               />
+              <small className="form-help">
+                💡 Konum sekmesinden harita üzerinde de konumu belirleyebilirsiniz
+              </small>
             </div>
           </div>
 
@@ -347,29 +416,37 @@ const AddPropertyPage = ({ user }) => {
             
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="rooms">Oda Sayısı</label>
-                <input
-                  type="number"
+                <label htmlFor="rooms">Oda Sayısı *</label>
+                <select
                   id="rooms"
                   name="rooms"
                   value={property.rooms}
                   onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                />
+                  required
+                >
+                  {ROOM_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="bathrooms">Banyo Sayısı</label>
-                <input
-                  type="number"
+                <label htmlFor="bathrooms">Banyo Sayısı *</label>
+                <select
                   id="bathrooms"
                   name="bathrooms"
                   value={property.bathrooms}
                   onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                />
+                  required
+                >
+                  {BATHROOM_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -561,7 +638,7 @@ const AddPropertyPage = ({ user }) => {
             <ImageUploader 
               images={images}
               onImagesChange={setImages}
-              maxImages={10}
+              maxImages={30}
             />
           </div>
 

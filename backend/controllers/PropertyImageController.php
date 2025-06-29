@@ -228,17 +228,42 @@ class PropertyImageController {
             }
             
             // Dosya kontrolü
-            if (!isset($_FILES['images'])) {
-                http_response_code(400);
+            if (empty($_FILES)) {
+                http_response_code(422);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Resim dosyaları seçilmedi'
+                    'message' => 'Resim dosyaları seçilmedi',
+                    'debug' => 'No files in $_FILES'
+                ]);
+                return;
+            }
+            
+            // images[] formatını kontrol et
+            $files_array = null;
+            if (isset($_FILES['images'])) {
+                $files_array = $_FILES['images'];
+            } else {
+                // $_FILES array'ini kontrol et ve ilk uygun array'i bul
+                foreach ($_FILES as $key => $file_data) {
+                    if (is_array($file_data) && isset($file_data['name'])) {
+                        $files_array = $file_data;
+                        break;
+                    }
+                }
+            }
+            
+            if (!$files_array) {
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Resim dosyaları bulunamadı',
+                    'debug' => array_keys($_FILES)
                 ]);
                 return;
             }
             
             // Dosyaları yükle
-            $upload_result = $this->fileUploadService->uploadMultiple($_FILES['images'], $property_id);
+            $upload_result = $this->fileUploadService->uploadMultiple($files_array, $property_id);
             
             $saved_images = [];
             $failed_images = [];

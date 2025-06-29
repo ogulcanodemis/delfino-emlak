@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { canViewPrice } from '../services/authService';
+import { ROOM_FILTER_OPTIONS } from '../utils/constants';
 import { 
   getProperties, 
   getPropertyTypes, 
@@ -579,12 +580,11 @@ const PropertiesPage = ({ user }) => {
                     e.target.style.boxShadow = 'none';
                   }}
                 >
-                  <option value="">Tümü</option>
-                  <option value="1">1 Oda</option>
-                  <option value="2">2 Oda</option>
-                  <option value="3">3 Oda</option>
-                  <option value="4">4 Oda</option>
-                  <option value="5">5+ Oda</option>
+                  {ROOM_FILTER_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
