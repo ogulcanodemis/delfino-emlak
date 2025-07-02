@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getProperty, updateProperty, getPropertyTypes, getCities, getDistricts, getPropertyImages, uploadPropertyImages, deletePropertyImage, setPrimaryImage } from '../services/apiService';
 import ImageUploader from '../components/ImageUploader';
 import MapSelector from '../components/MapSelector';
-import { ROOM_OPTIONS, BATHROOM_OPTIONS } from '../utils/constants';
+import { ROOM_OPTIONS, BATHROOM_OPTIONS, FUEL_TYPE_OPTIONS, TRANSMISSION_OPTIONS, VEHICLE_CONDITION_OPTIONS, PROPERTY_TYPE_CATEGORIES } from '../utils/constants';
 import './EditPropertyPage.css';
 
 const EditPropertyPage = ({ user }) => {
@@ -38,7 +38,14 @@ const EditPropertyPage = ({ user }) => {
     internet: 0,
     credit_suitable: 0,
     exchange_suitable: 0,
-    is_active: 1
+    is_active: 1,
+    // Araç özel alanları
+    vehicle_brand: '',
+    vehicle_model: '',
+    vehicle_year: '',
+    vehicle_fuel_type: '',
+    vehicle_mileage: '',
+    vehicle_condition: ''
   });
 
   const [propertyTypes, setPropertyTypes] = useState([]);
@@ -140,6 +147,19 @@ const EditPropertyPage = ({ user }) => {
   const getSelectedDistrictName = () => {
     const district = districts.find(d => d.id == property.district_id);
     return district ? district.name : '';
+  };
+
+  // Emlak tipine göre alan kontrolü
+  const isVehicleProperty = () => {
+    return PROPERTY_TYPE_CATEGORIES.VEHICLE.includes(parseInt(property.property_type_id));
+  };
+
+  const isLandProperty = () => {
+    return PROPERTY_TYPE_CATEGORIES.LAND.includes(parseInt(property.property_type_id));
+  };
+
+  const isRealEstateProperty = () => {
+    return PROPERTY_TYPE_CATEGORIES.REAL_ESTATE.includes(parseInt(property.property_type_id));
   };
 
   // Fotoğraf yönetimi fonksiyonları
@@ -467,124 +487,232 @@ const EditPropertyPage = ({ user }) => {
           <div className="form-section">
             <h3>◆ Detay Bilgileri</h3>
             
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="rooms">Oda Sayısı *</label>
-                <select
-                  id="rooms"
-                  name="rooms"
-                  value={property.rooms}
-                  onChange={handleChange}
-                  required
-                >
-                  {ROOM_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Emlak İçin Oda/Banyo Bilgileri */}
+            {isRealEstateProperty() && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="rooms">Oda Sayısı *</label>
+                  <select
+                    id="rooms"
+                    name="rooms"
+                    value={property.rooms}
+                    onChange={handleChange}
+                    required
+                  >
+                    {ROOM_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="bathrooms">Banyo Sayısı *</label>
-                <select
-                  id="bathrooms"
-                  name="bathrooms"
-                  value={property.bathrooms}
-                  onChange={handleChange}
-                  required
-                >
-                  {BATHROOM_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="form-group">
+                  <label htmlFor="bathrooms">Banyo Sayısı *</label>
+                  <select
+                    id="bathrooms"
+                    name="bathrooms"
+                    value={property.bathrooms}
+                    onChange={handleChange}
+                    required
+                  >
+                    {BATHROOM_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="floor">Bulunduğu Kat</label>
-                <input
-                  type="number"
-                  id="floor"
-                  name="floor"
-                  value={property.floor}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-              </div>
+            {/* Araç İçin Özel Bilgiler */}
+            {isVehicleProperty() && (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="vehicle_brand">Marka *</label>
+                    <input
+                      type="text"
+                      id="vehicle_brand"
+                      name="vehicle_brand"
+                      value={property.vehicle_brand}
+                      onChange={handleChange}
+                      required
+                      placeholder="Örn: Toyota, Mercedes, Honda"
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="total_floors">Toplam Kat Sayısı</label>
-                <input
-                  type="number"
-                  id="total_floors"
-                  name="total_floors"
-                  value={property.total_floors}
-                  onChange={handleChange}
-                  min="1"
-                  placeholder="0"
-                />
-              </div>
-            </div>
+                  <div className="form-group">
+                    <label htmlFor="vehicle_model">Model *</label>
+                    <input
+                      type="text"
+                      id="vehicle_model"
+                      name="vehicle_model"
+                      value={property.vehicle_model}
+                      onChange={handleChange}
+                      required
+                      placeholder="Örn: Corolla, C-Class, Civic"
+                    />
+                  </div>
+                </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="building_age">Bina Yaşı</label>
-                <input
-                  type="number"
-                  id="building_age"
-                  name="building_age"
-                  value={property.building_age}
-                  onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="vehicle_year">Model Yılı *</label>
+                    <input
+                      type="number"
+                      id="vehicle_year"
+                      name="vehicle_year"
+                      value={property.vehicle_year}
+                      onChange={handleChange}
+                      required
+                      min="1900"
+                      max={new Date().getFullYear() + 1}
+                      placeholder="2020"
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="heating_type">Isıtma Tipi</label>
-                <select
-                  id="heating_type"
-                  name="heating_type"
-                  value={property.heating_type}
-                  onChange={handleChange}
-                >
-                  <option value="Doğalgaz">Doğalgaz</option>
-                  <option value="Elektrik">Elektrik</option>
-                  <option value="Kömür">Kömür</option>
-                  <option value="Fuel-oil">Fuel-oil</option>
-                  <option value="Güneş Enerjisi">Güneş Enerjisi</option>
-                  <option value="Jeotermal">Jeotermal</option>
-                  <option value="Klima">Klima</option>
-                  <option value="Soba">Soba</option>
-                  <option value="Şömine">Şömine</option>
-                  <option value="Yok">Yok</option>
-                </select>
-              </div>
-            </div>
+                  <div className="form-group">
+                    <label htmlFor="vehicle_condition">Araç Durumu *</label>
+                    <select
+                      id="vehicle_condition"
+                      name="vehicle_condition"
+                      value={property.vehicle_condition}
+                      onChange={handleChange}
+                      required
+                    >
+                      {VEHICLE_CONDITION_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="furnishing">Eşya Durumu</label>
-              <select
-                id="furnishing"
-                name="furnishing"
-                value={property.furnishing}
-                onChange={handleChange}
-              >
-                <option value="Eşyasız">Eşyasız</option>
-                <option value="Eşyalı">Eşyalı</option>
-                <option value="Yarı Eşyalı">Yarı Eşyalı</option>
-              </select>
-            </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="vehicle_fuel_type">Yakıt Tipi</label>
+                    <select
+                      id="vehicle_fuel_type"
+                      name="vehicle_fuel_type"
+                      value={property.vehicle_fuel_type}
+                      onChange={handleChange}
+                    >
+                      {FUEL_TYPE_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="vehicle_mileage">Kilometre</label>
+                    <input
+                      type="number"
+                      id="vehicle_mileage"
+                      name="vehicle_mileage"
+                      value={property.vehicle_mileage}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="150000"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Emlak İçin Kat/Bina Bilgileri */}
+            {isRealEstateProperty() && (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="floor">Bulunduğu Kat</label>
+                    <input
+                      type="number"
+                      id="floor"
+                      name="floor"
+                      value={property.floor}
+                      onChange={handleChange}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="total_floors">Toplam Kat Sayısı</label>
+                    <input
+                      type="number"
+                      id="total_floors"
+                      name="total_floors"
+                      value={property.total_floors}
+                      onChange={handleChange}
+                      min="1"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="building_age">Bina Yaşı</label>
+                    <input
+                      type="number"
+                      id="building_age"
+                      name="building_age"
+                      value={property.building_age}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="heating_type">Isıtma Tipi</label>
+                    <select
+                      id="heating_type"
+                      name="heating_type"
+                      value={property.heating_type}
+                      onChange={handleChange}
+                    >
+                      <option value="Doğalgaz">Doğalgaz</option>
+                      <option value="Elektrik">Elektrik</option>
+                      <option value="Kömür">Kömür</option>
+                      <option value="Fuel-oil">Fuel-oil</option>
+                      <option value="Güneş Enerjisi">Güneş Enerjisi</option>
+                      <option value="Jeotermal">Jeotermal</option>
+                      <option value="Klima">Klima</option>
+                      <option value="Soba">Soba</option>
+                      <option value="Şömine">Şömine</option>
+                      <option value="Yok">Yok</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="furnishing">Eşya Durumu</label>
+                  <select
+                    id="furnishing"
+                    name="furnishing"
+                    value={property.furnishing}
+                    onChange={handleChange}
+                  >
+                    <option value="Eşyasız">Eşyasız</option>
+                    <option value="Eşyalı">Eşyalı</option>
+                    <option value="Yarı Eşyalı">Yarı Eşyalı</option>
+                  </select>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="form-section">
-            <h3>◆ Özellikler</h3>
-            
-            <div className="checkbox-grid">
+          {/* Özellikler sadece Emlak için */}
+          {isRealEstateProperty() && (
+            <div className="form-section">
+              <h3>◆ Özellikler</h3>
+              
+              <div className="checkbox-grid">
               <label className="checkbox-item">
                 <input
                   type="checkbox"
@@ -684,8 +812,9 @@ const EditPropertyPage = ({ user }) => {
                 />
                 <span>◇ Takasa Uygun</span>
               </label>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="form-section">
             <h3>◆ Fotoğraf Yönetimi</h3>
